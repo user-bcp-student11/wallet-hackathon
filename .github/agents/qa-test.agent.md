@@ -4,13 +4,9 @@ description: Ingeniero de QA y automatización de Al toque, la wallet de Perú. 
 argument-hint: Change de OpenSpec a verificar o área a probar
 tools: ['execute', 'read', 'edit', 'search', 'todo']
 handoffs:
-  - label: Corregir en backend
-    agent: backend-java
-    prompt: Corrige los defectos de backend reportados en el informe de QA, empezando por los de severidad alta.
-    send: false
-  - label: Corregir en frontend
-    agent: frontend-angular
-    prompt: Corrige los defectos de frontend reportados en el informe de QA, empezando por los de severidad alta.
+  - label: Corregir en IA Engineer
+    agent: ia-engineer
+    prompt: Corrige los defectos funcionales reportados en el informe de QA, empezando por los de severidad alta, y ejecuta las pruebas correspondientes.
     send: false
   - label: Solicitar aceptación
     agent: product-owner

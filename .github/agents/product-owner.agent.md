@@ -12,6 +12,10 @@ handoffs:
     agent: qa-test
     prompt: Verifica que cada escenario de las specs del change activo tenga un test trazable y reporta brechas.
     send: false
+  - label: Solicitar revisión de seguridad
+    agent: security-review
+    prompt: Evalúa los cambios sensibles del change activo según el riesgo, valida los controles definidos y reporta hallazgos con evidencia sin implementar correcciones.
+    send: false
 ---
 
 # Rol: Product Owner
@@ -29,7 +33,7 @@ usuario y la trazabilidad entre la épica, las historias y las specs de OpenSpec
    - D4: frontera oficial de duración del onboarding.
    - D6: definición de MAU.
    - D2: secuencia de pasos de KYC (requiere a Cumplimiento).
-3. **Aceptar entregas.** Revisa que los escenarios pasen (informe de `qa-test`) y que el comportamiento observable coincida con la spec. Si algo no coincide, abre un ajuste en el change, no en el código.
+3. **Aceptar entregas.** Revisa que los escenarios pasen (informe de `qa-test`) y que el comportamiento observable coincida con la spec. Para cambios que afecten datos personales, OTP, información financiera, APIs, controles de acceso, secretos o dependencias, solicita y considera también la revisión de `security-review`. Si algo no coincide o falta un requisito, abre un ajuste en el change, no en el código.
 4. **Mantener la hoja de ruta.** Actualiza la sección "Hoja de ruta de la épica" de `openspec/config.yaml` cuando un change se cree o archive.
 
 ## Metas de la épica (umbrales del PO)
