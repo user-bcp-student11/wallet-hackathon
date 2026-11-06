@@ -7,7 +7,8 @@ El repositorio no tiene código; solo existen la épica y las seis historias en 
 - El ecosistema es multirriel y las integraciones reales son contractuales, así que el núcleo no puede acoplarse a un proveedor.
 - La wallet no guarda saldo; el registro interno solo contiene intentos y resultados.
 - Los estados llegan de forma asíncrona, por lo que el sistema debe tolerar callbacks tardíos, repetidos y contradictorios.
-- Pila confirmada: Java con Spring Boot y JUnit 5, con Maven como herramienta de construcción. Almacenamiento relacional: H2 en desarrollo y pruebas, PostgreSQL en producción.
+- Pila: Java 21, Spring Boot 3.x, Maven, PostgreSQL y Flyway; pruebas con JUnit 5 y Testcontainers. Versiones exactas en `docs/architecture/adr/001-stack.md`.
+- Estructura: monolito modular en `backend/` con arquitectura hexagonal por módulo. Este cambio crea el módulo `payments` (`domain`, `application`, `adapters.in.web`, `adapters.out.persistence`, `adapters.out.provider`) junto a `onboarding`, `wallet` y `analytics` de `add-wallet-onboarding`.
 
 ## Goals / Non-Goals
 
@@ -76,7 +77,7 @@ Alternativa descartada: publicar directamente tras confirmar. Puede perder el ev
 
 ### 7. Modelo de datos del registro interno
 
-Elementos persistidos: pago (referencia, pagador, destino, monto en unidad mínima, estado, tiempos, enlace al intento previo), historial de transiciones, registro de idempotencia, registro de duplicados (identificador de solicitud, identificador de correlación, referencia original), discrepancias (resultado recibido y motivo) y bandeja de salida de eventos. El esquema se versiona con migraciones y debe funcionar igual en H2 y PostgreSQL; las restricciones de unicidad y las actualizaciones condicionales de las decisiones 2 y 3 se apoyan en ambos.
+Elementos persistidos: pago (referencia, pagador, destino, monto en unidad mínima, estado, tiempos, enlace al intento previo), historial de transiciones, registro de idempotencia, registro de duplicados (identificador de solicitud, identificador de correlación, referencia original), discrepancias (resultado recibido y motivo) y bandeja de salida de eventos. El esquema se versiona con migraciones Flyway aditivas sobre PostgreSQL; las restricciones de unicidad y las actualizaciones condicionales de las decisiones 2 y 3 se apoyan en él. Las pruebas de integración usan PostgreSQL real con Testcontainers, sin base en memoria alterna.
 
 ### 8. Operaciones expuestas por la entrada
 
@@ -92,7 +93,6 @@ El tiempo se obtiene por un puerto de reloj para poder probar ventanas y expirac
 - [Un éxito tardío del proveedor tras `EXPIRED` significa dinero movido con intento expirado] → Se registra como discrepancia con la referencia; queda como entrada para conciliación (W6) y soporte (W4).
 - [Competencia entre callback y expiración, o entre solicitudes simultáneas] → Transiciones condicionales y restricción de unicidad en la clave activa; pruebas de concurrencia explícitas.
 - [El proveedor simulado da falsa confianza sobre el real] → El contrato de proveedor se mantiene mínimo y el simulador reproduce fallos, silencios y duplicados; la integración real es un cambio posterior.
-- [Diferencias de comportamiento entre H2 y PostgreSQL] → Las pruebas de concurrencia e idempotencia se ejecutan también contra PostgreSQL real mediante contenedor de pruebas.
 - [Valores de ventana, expiración y retención sin validar con negocio] → Son configurables y figuran como supuestos en el proposal.
 
 ## Open Questions
