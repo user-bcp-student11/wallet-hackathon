@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a2d">
+  <meta name="description" content="Presentación del caso Billetera Digital Al Toque y el trabajo de onboarding del MVP.">
+  <title>Al Toque | Caso de onboarding MVP</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f3f6fb;
+      --muted: #aab8ca;
+      --surface: #17243a;
+      --surface-raised: #1d2d46;
+      --line: rgba(195, 216, 240, .16);
+      --lime: #c8f169;
+      --cyan: #66e0d1;
+      --blue: #82aaff;
+      --amber: #ffd18a;
+      --pink: #ff9aab;
+      --page: #101a2d;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 86% 2%, rgba(92, 176, 171, .13), transparent 34rem),
+        radial-gradient(ellipse at 4% 28%, rgba(116, 144, 226, .12), transparent 31rem),
+        var(--page);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; }
+
+    .skip-link {
+      position: absolute;
+      top: .75rem;
+      left: .75rem;
+      z-index: 5;
+      padding: .65rem 1rem;
+      color: #101a2d;
+      background: var(--lime);
+      border-radius: .5rem;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .8rem clamp(1rem, 5vw, 4.5rem);
+      border-bottom: 1px solid var(--line);
+      background: rgba(16, 26, 45, .88);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .65rem;
+      color: var(--ink);
+      font-size: .9rem;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      color: #13202d;
+      background: var(--lime);
+      border-radius: .7rem;
+      font-weight: 900;
+    }
+
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: .35rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    nav a {
+      display: inline-block;
+      padding: .45rem .7rem;
+      color: var(--muted);
+      border-radius: .55rem;
+      font-size: .82rem;
+      text-decoration: none;
+    }
+
+    nav a:hover, nav a:focus-visible {
+      color: var(--ink);
+      background: var(--surface-raised);
+    }
+
+    main { overflow: clip; }
+
+    .section {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: clamp(4rem, 9vw, 7.5rem) 0;
+      scroll-margin-top: 5.5rem;
+    }
+
+    .section + .section { border-top: 1px solid var(--line); }
+
+    .eyebrow {
+      margin: 0 0 .75rem;
+      color: var(--lime);
+      font-size: .77rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 850px;
+      margin-bottom: 1.1rem;
+      font-size: clamp(2.7rem, 8vw, 6.3rem);
+      letter-spacing: -.065em;
+      line-height: .99;
+    }
+
+    h2 {
+      max-width: 800px;
+      margin-bottom: .85rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: -.045em;
+      line-height: 1.08;
+    }
+
+    h3 {
+      margin-bottom: .45rem;
+      font-size: 1.08rem;
+      letter-spacing: -.015em;
+    }
+
+    .lede {
+      max-width: 760px;
+      color: #d1dbe8;
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
+    }
+
+    .muted, .card p, .card li { color: var(--muted); }
+
+    .hero {
+      display: grid;
+      min-height: min(760px, calc(100svh - 4.2rem));
+      align-content: center;
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+
+    .hero h1 span { color: var(--lime); }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      margin: 1.7rem 0 2.2rem;
+    }
+
+    .pill, .tag {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: .34rem .68rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #d6e1ef;
+      background: rgba(255,255,255,.035);
+      font-size: .78rem;
+      font-weight: 650;
+    }
+
+    .pill strong { margin-right: .3rem; color: var(--lime); }
+
+    .hero-grid, .grid-2, .grid-3, .roles-grid, .criteria-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .roles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .criteria-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .roles-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+      align-items: start;
+      gap: 1.25rem;
+      margin-top: 1.75rem;
+    }
+
+    .roles-panel, .workflow-panel { min-width: 0; }
+    .roles-panel > h3, .workflow-panel > h3 { margin-bottom: .35rem; }
+    .roles-panel > .muted, .workflow-panel > .muted { margin-bottom: .9rem; font-size: .9rem; }
+
+    .card {
+      padding: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: linear-gradient(145deg, rgba(29,45,70,.95), rgba(23,36,58,.92));
+    }
+
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+
+    .metric {
+      display: block;
+      margin-bottom: .3rem;
+      color: var(--lime);
+      font-size: clamp(1.6rem, 4vw, 2.35rem);
+      font-weight: 820;
+      letter-spacing: -.05em;
+      line-height: 1.1;
+    }
+
+    .metric-label { color: var(--muted); font-size: .9rem; }
+
+    .callout {
+      margin-top: 1rem;
+      padding: 1rem 1.15rem;
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 .8rem .8rem 0;
+      color: #dbe8ef;
+      background: rgba(102, 224, 209, .07);
+    }
+
+    .callout strong { color: var(--cyan); }
+
+    .role-card { position: relative; overflow: hidden; padding: 1rem; }
+    .role-card::after {
+      position: absolute;
+      top: -2.4rem;
+      right: -2rem;
+      width: 6rem;
+      height: 6rem;
+      border: 1px solid rgba(200, 241, 105, .18);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .role-number {
+      display: inline-grid;
+      width: 2rem;
+      height: 2rem;
+      margin-bottom: .85rem;
+      place-items: center;
+      color: var(--lime);
+      border: 1px solid rgba(200, 241, 105, .35);
+      border-radius: .65rem;
+      font-size: .8rem;
+      font-weight: 800;
+    }
+
+    .role-summary { margin: 0; color: var(--muted); font-size: .9rem; }
+
+    .plain-list {
+      display: grid;
+      gap: .45rem;
+      margin: .8rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .tag { margin: 0 0 .8rem; color: var(--cyan); }
+
+    .workflow-list {
+      display: grid;
+      gap: .65rem;
+      margin: .9rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .workflow-step {
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: .75rem;
+      min-width: 0;
+      padding: .85rem;
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+      background: rgba(255,255,255,.025);
+    }
+
+    .workflow-number {
+      display: grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      color: #14202d;
+      background: var(--lime);
+      border-radius: .6rem;
+      font-size: .78rem;
+      font-weight: 850;
+    }
+
+    .workflow-step h3 { margin: .05rem 0 .35rem; font-size: .97rem; }
+    .workflow-step p { margin: .25rem 0 0; color: var(--muted); font-size: .86rem; line-height: 1.5; }
+    .workflow-step p strong { color: var(--ink); }
+    .workflow-step .workflow-branch { color: #d3e2ef; }
+
+    .story-quote {
+      padding: clamp(1.25rem, 3vw, 2rem);
+      border: 1px solid rgba(200, 241, 105, .28);
+      border-radius: 1rem;
+      background: linear-gradient(125deg, rgba(200, 241, 105, .09), rgba(102, 224, 209, .04));
+      font-size: clamp(1.12rem, 2.3vw, 1.45rem);
+      line-height: 1.55;
+    }
+
+    .story-quote strong { color: var(--lime); }
+
+    .criterion {
+      display: flex;
+      gap: .9rem;
+      align-items: flex-start;
+    }
+
+    .criterion b {
+      display: grid;
+      flex: 0 0 1.8rem;
+      width: 1.8rem;
+      height: 1.8rem;
+      place-items: center;
+      color: #14202d;
+      background: var(--lime);
+      border-radius: .55rem;
+      font-size: .8rem;
+    }
+
+    .criterion p { margin: .05rem 0 0; color: var(--muted); }
+
+    .footer {
+      padding: 1.5rem 1rem 2.5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      text-align: center;
+      font-size: .82rem;
+    }
+
+    @media (max-width: 900px) {
+      .roles-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 800px) {
+      .hero-grid, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 580px) {
+      .topbar { align-items: flex-start; flex-direction: column; padding: .7rem 1rem; }
+      nav ul { justify-content: flex-start; gap: .1rem; }
+      nav a { padding: .35rem .5rem; font-size: .76rem; }
+      .section { width: min(100% - 1.25rem, 1120px); padding: 3.8rem 0; }
+      .hero { min-height: auto; padding-top: 4rem; }
+      .hero-grid, .grid-2, .grid-3, .roles-grid, .criteria-grid { grid-template-columns: 1fr; }
+      .card { padding: 1.05rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    @media print {
+      :root { color-scheme: light; --ink: #17243a; --muted: #46566b; --page: #fff; --surface: #f5f7fa; --surface-raised: #eef2f6; --line: rgba(23,36,58,.18); }
+      body { color: var(--ink); background: #fff; print-color-adjust: exact; }
+      .topbar { position: static; background: #fff; }
+      nav { display: none; }
+      .section { width: 100%; padding: 2rem 0; break-inside: avoid; }
+      .card, .story-quote, .workflow-step { background: #f5f7fa; }
+      .lede, .workflow-step p strong { color: var(--ink); }
+      .footer { color: var(--muted); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Al Toque, inicio">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span>AL TOQUE <span class="muted">/ CASO MVP</span></span>
+    </a>
+    <nav aria-label="Secciones de la presentación">
+      <ul>
+        <li><a href="#caso">01 Caso</a></li>
+        <li><a href="#roles">02 Roles y flujo</a></li>
+        <li><a href="#historia">03 Historia</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <header class="section hero" id="inicio" aria-labelledby="title">
+      <p class="eyebrow">Billetera Digital · Perú</p>
+      <h1 id="title">Pagos cotidianos.<br><span>Sin fricción.</span></h1>
+      <p class="lede">Un MVP de wallet para que las personas completen su registro con claridad, activen su billetera y lleguen listas a pagar.</p>
+      <div class="hero-meta" aria-label="Contexto del caso">
+        <span class="pill"><strong>Épica</strong> peru-wallet-mvp.sp.md</span>
+        <span class="pill"><strong>Historia</strong> w1-user-onboarding-mvp-completion.sp.md</span>
+        <span class="pill">MVP · Perú</span>
+      </div>
+      <div class="hero-grid">
+        <article class="card">
+          <span class="metric">8 → 3 min</span>
+          <span class="metric-label">Meta de mediana para completar onboarding</span>
+        </article>
+        <article class="card">
+          <span class="metric">30% → 8%</span>
+          <span class="metric-label">Meta de reducción de abandono en checkout</span>
+        </article>
+        <article class="card">
+          <span class="metric">PEN 10</span>
+          <span class="metric-label">CAC objetivo por usuario nuevo en meses 1–3</span>
+        </article>
+      </div>
+      <div class="callout"><strong>La oportunidad:</strong> acelerar el onboarding y hacer confiables los pagos pequeños y los cobros con QR, sin perder de vista operación, medición y cumplimiento.</div>
+    </header>
+
+    <section class="section" id="caso" aria-labelledby="caso-title">
+      <p class="eyebrow">01 · Presentación del caso</p>
+      <h2 id="caso-title">Una wallet sencilla de empezar y confiable de usar.</h2>
+      <p class="lede">La épica apunta a personas que hacen transferencias frecuentes de bajo monto y a pequeños comercios que cobran con QR. El primer paso de esta presentación es completar el onboarding del segmento MVP.</p>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Para las personas</h3>
+          <p>Un recorrido guiado que indica el paso actual, explica qué sigue y ayuda a corregir datos inválidos sin perder lo ingresado.</p>
+        </article>
+        <article class="card">
+          <h3>Para el negocio</h3>
+          <p>Medir inicio, avance y cierre del onboarding, además de activaciones y atribución de adquisición para seguir los objetivos del MVP.</p>
+        </article>
+        <article class="card">
+          <h3>Para operar en Perú</h3>
+          <p>Preparar un producto para un ecosistema multirriel, con límites e integraciones sujetos a acuerdos y definiciones de cumplimiento.</p>
+        </article>
+      </div>
+      <div class="grid-2" style="margin-top:1rem">
+        <article class="card">
+          <h3>Éxito de la épica</h3>
+          <ul class="plain-list">
+            <li>MVP lanzado dentro de un trimestre.</li>
+            <li>MAU entre 1,000 y 2,000 durante los primeros tres meses.</li>
+            <li>CAC de PEN 10 por usuario nuevo durante los primeros tres meses.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Alcance de esta historia</h3>
+          <p>Onboarding guiado, validación de información, activación de wallet y eventos para observar el funnel. Los pagos de bajo monto son el siguiente punto de entrada, no el alcance de implementación de esta historia.</p>
+        </article>
+      </div>
+      <div class="callout"><strong>Fuera de alcance de la épica:</strong> expansión multipaís, lealtad avanzada, paridad completa entre proveedores desde el día uno y APIs de pago abiertas para terceros.</div>
+    </section>
+
+    <section class="section" id="roles" aria-labelledby="roles-title">
+      <p class="eyebrow">02 · Roles usados</p>
+      <h2 id="roles-title">Quién hace qué y cómo avanza la historia.</h2>
+      <p class="lede">Backend y frontend trabajan como responsabilidades separadas sobre la historia de onboarding, con revisiones y decisiones explícitas en cada etapa.</p>
+      <div class="roles-layout">
+        <div class="roles-panel">
+          <h3>Definición de roles</h3>
+          <p class="muted">Responsabilidades concretas para la historia W1.</p>
+          <div class="roles-grid">
+            <article class="card role-card">
+              <span class="role-number">01</span><span class="tag">Producto</span>
+              <h3>Product Owner</h3>
+              <p class="role-summary">Define alcance, criterios y decisiones abiertas de onboarding; acepta el resultado.</p>
+            </article>
+            <article class="card role-card">
+              <span class="role-number">02</span><span class="tag">Diseño técnico</span>
+              <h3>Arquitecto</h3>
+              <p class="role-summary">Define diseño, ADR y contrato API; revisa que la implementación respete la arquitectura.</p>
+            </article>
+            <article class="card role-card">
+              <span class="role-number">03</span><span class="tag">Servidor</span>
+              <h3>IA Engineer Backend</h3>
+              <p class="role-summary">Implementa pasos, validación, activación de wallet y eventos de onboarding en Spring Boot.</p>
+            </article>
+            <article class="card role-card">
+              <span class="role-number">04</span><span class="tag">Experiencia</span>
+              <h3>IA Engineer Frontend</h3>
+              <p class="role-summary">Construye el flujo Angular, progreso, errores accesibles y captura de atribución.</p>
+            </article>
+            <article class="card role-card">
+              <span class="role-number">05</span><span class="tag">Calidad</span>
+              <h3>QA / Test</h3>
+              <p class="role-summary">Traza criterios a pruebas, ejecuta suites y reporta defectos funcionales con evidencia.</p>
+            </article>
+            <article class="card role-card">
+              <span class="role-number">06</span><span class="tag">Protección</span>
+              <h3>Security Review</h3>
+              <p class="role-summary">Evalúa KYC, datos personales, APIs y privacidad; reporta hallazgos sin modificar producción.</p>
+            </article>
+          </div>
+        </div>
+        <div class="workflow-panel">
+          <h3 id="workflow-title">Flujo de trabajo · W1 onboarding</h3>
+          <p class="muted">Del planteamiento del cambio a su aceptación y archivo.</p>
+          <ol class="workflow-list" aria-labelledby="workflow-title">
+            <li class="workflow-step">
+              <span class="workflow-number">1</span>
+              <div>
+                <h3>PROPOSE · Acordar qué construir</h3>
+                <p><strong>Product Owner</strong> convierte la historia W1 en proposal y spec delta con alcance y criterios verificables.</p>
+                <p class="workflow-branch"><strong>Aprueba:</strong> PO valida el alcance; KYC se define con Cumplimiento y la frontera temporal se acuerda antes de implementar.</p>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-number">2</span>
+              <div>
+                <h3>DESIGN · Resolver cómo construirlo</h3>
+                <p><strong>Arquitecto</strong> define design.md, ADR y contrato API. En paralelo, <strong>QA y Seguridad</strong> identifican escenarios límite y riesgos y los reportan a Producto/Arquitectura.</p>
+                <p class="workflow-branch"><strong>Revisión:</strong> Arquitectura valida el diseño; Producto ajusta la spec si cambia el comportamiento. Los huecos regresan a PROPOSE o DESIGN.</p>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-number">3</span>
+              <div>
+                <h3>APPLY · Implementar tarea por tarea</h3>
+                <p><strong>Backend y frontend</strong> implementan contra la spec y el contrato API, escriben pruebas y marcan tareas solo cuando las validaciones quedan en verde.</p>
+                <p class="workflow-branch"><strong>Revisión:</strong> Arquitectura contrasta los cambios con el diseño, los ADR y el contrato.</p>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-number">4</span>
+              <div>
+                <h3>VERIFY · Comprobar criterios y riesgos</h3>
+                <p><strong>QA</strong> ejecuta pruebas y compara el comportamiento con los escenarios. <strong>Seguridad</strong> revisa controles y análisis disponibles para los datos personales, KYC y APIs.</p>
+                <p class="workflow-branch"><strong>Si falla:</strong> vuelve a APPLY con evidencia; las ambigüedades regresan a Producto o Arquitectura.</p>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-number">5</span>
+              <div>
+                <h3>ARCHIVE · Cerrar y aceptar</h3>
+                <p>Con verificaciones aprobadas, se archiva el change y se actualizan las specs base y la hoja de ruta de la épica.</p>
+                <p class="workflow-branch"><strong>Acepta:</strong> Product Owner revisa la evidencia y acepta la entrega.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="historia" aria-labelledby="historia-title">
+      <p class="eyebrow">03 · Historia trabajada</p>
+      <h2 id="historia-title">Registro y activación del MVP de wallet</h2>
+      <p class="muted">Historia <code>#w1-user-onboarding-mvp-completion.sp.md</code> · Épica <code>#peru-wallet-mvp.sp.md</code></p>
+      <blockquote class="story-quote">
+        Como <strong>usuario de smartphone que realiza transferencias diarias de bajo monto</strong>, quiero completar el onboarding con un flujo guiado y señales claras de siguiente paso, para poder empezar a pagar sin abandonar el proceso.
+      </blockquote>
+      <h3 style="margin-top:2rem">Criterios de aceptación</h3>
+      <div class="criteria-grid">
+        <article class="card criterion"><b>1</b><p>La secuencia de pasos requeridos y el paso actual se mantienen visibles durante el onboarding.</p></article>
+        <article class="card criterion"><b>2</b><p>La información obligatoria faltante o inválida bloquea el avance y muestra cómo corregirla.</p></article>
+        <article class="card criterion"><b>3</b><p>Al completar el flujo, la wallet pasa a activa y se habilita el acceso a pagos de bajo monto.</p></article>
+        <article class="card criterion"><b>4</b><p>Se registran eventos de inicio, finalización de cada paso y cierre del flujo para analítica.</p></article>
+        <article class="card criterion"><b>5</b><p>La mediana de finalización para la cohorte MVP baja de 8 a 3 minutos dentro del trimestre posterior al lanzamiento.</p></article>
+        <article class="card criterion"><b>6</b><p>La analítica entrega conteos mensuales de nuevos usuarios activos y atribución de gasto para verificar MAU y CAC en meses 1–3.</p></article>
+      </div>
+      <div class="grid-2" style="margin-top:1rem">
+        <article class="card">
+          <h3>Dependencia de producto y cumplimiento</h3>
+          <p>La secuencia de requisitos KYC y documentación debe definirse con Cumplimiento y Producto antes de implementar.</p>
+        </article>
+        <article class="card">
+          <h3>Pregunta abierta registrada</h3>
+          <p>¿Qué frontera de eventos define oficialmente la duración del onboarding: qué timestamps marcan el inicio y el fin?</p>
+        </article>
+      </div>
+      <div class="callout"><strong>Regla de trabajo:</strong> si una decisión abierta cambia el comportamiento o la medición, se aclara antes de codificar; no se inventa una respuesta en backend o frontend.</div>
+    </section>
+
+  </main>
+
+  <footer class="footer">Billetera Digital Al Toque · Presentación del caso y del flujo de colaboración del MVP</footer>
+</body>
+</html>
