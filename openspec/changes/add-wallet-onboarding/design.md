@@ -2,72 +2,58 @@
 
 ## Context
 
-El repositorio aún no tiene código. Este cambio es el primero que toca el frontend y comparte el backend con `payment-core`. Motivación en `proposal.md`; comportamiento en `specs/`. Restricciones:
+El repositorio ya tiene el backend de este cambio en `api-wallet/backend`. Este cambio es el primero que toca el frontend y comparte el backend con `payment-core`. Motivación en `proposal.md`; comportamiento en `specs/`. Restricciones:
 
-- Stack: Java 21, Spring Boot 3.x, Maven, PostgreSQL y Flyway en el backend; Angular mobile-first (PWA) en el frontend. Las versiones exactas se fijan en `docs/architecture/adr/001-stack.md`.
-- Monolito modular con arquitectura hexagonal por módulo; este cambio crea `onboarding`, `wallet` y `analytics`.
-- Los proveedores externos (OTP y validación de identidad) se sustituyen por fakes configurables detrás de puertos.
-- Los requisitos de KYC no están definidos por Cumplimiento. Lo marcado como "Decisión provisional" debe confirmarse antes de producción.
+- Stack: Java 21, Spring Boot 3.x, Maven, PostgreSQL y Flyway en el backend; Angular mobile-first en el frontend. Las versiones exactas se fijan en `api-wallet/docs/architecture/adr/001-stack.md`.
+- Monolito modular con arquitectura hexagonal por módulo; este cambio crea `onboarding` (KYC) y `wallet`.
+- El contrato HTTP es `backend/src/main/resources/openapi-wallet.yml` (tag "W1 · Registro y activación") y es la fuente de verdad: rutas, códigos de estado y errores salen de él.
+- La verificación es simulada: el escenario de la solicitud decide el resultado. No se validan documentos reales.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Un onboarding cuya secuencia, validación y progreso los controla el servidor.
-- Eventos analíticos transaccionales y sin datos personales que permitan calcular las métricas de la épica.
-- Idempotencia en el inicio y la confirmación final.
+- Crear la verificación KYC simulada y su wallet de forma atómica según el escenario.
+- Permitir la decisión humana sobre revisiones manuales, con resultado final único aun con decisiones simultáneas.
+- Exponer el estado y los saldos de la wallet.
 
 **Non-Goals:**
-- KYC real con proveedor externo, vinculación de fuente de fondos, saldo o recarga.
-- Autenticación y sesiones posteriores al onboarding.
-- Integración con plataformas de marketing; el gasto se registra por una operación.
-- Visualización de métricas con tableros; este cambio entrega los cálculos y su consulta.
+- KYC real con proveedor externo, vinculación de fuente de fondos, recarga y reservas por pagos (W2).
+- Autenticación y sesiones.
+- `GET /support/cases` (W5) y el `429` de cloud.
+- Eventos analíticos, atribución y métricas: cambio aparte.
 
 ## Decisions
 
-### D1. Definición de pasos dirigida por el servidor
-El servidor entrega la lista de pasos, el paso actual, el progreso, y la instrucción y etiqueta del siguiente paso. El cliente renderiza un stepper genérico y un formulario por tipo de paso. La secuencia vive en configuración (`@ConfigurationProperties`).
-Alternativa descartada: pasos codificados en el frontend. Cualquier cambio de KYC exigiría desplegar el cliente y duplicaría la validación.
+### D1. El contrato `openapi-wallet.yml` es la fuente de verdad
+Rutas, cuerpos, códigos de estado y códigos de error (`{"error": "CODE"}`) se toman del contrato y de la especificación W1. Donde el contrato no define un código se elige uno estable: `INVALID_REQUEST` para el `400` genérico y `PAYLOAD_TOO_LARGE` para el `413`. El servicio escucha en el puerto 8787.
+Alternativa descartada: un contrato propio con Problem Details y cabecera `Idempotency-Key`. Duplicaría la fuente de verdad y no es compatible con quien consume el mock.
 
-### D2. Secuencia de pasos de KYC (Decisión provisional)
-Secuencia inicial de tres pasos: (1) `phone`: celular y OTP; (2) `identity`: tipo y número de documento (DNI o CE), nombres y fecha de nacimiento, con mayoría de edad; (3) `confirmation`: aceptación de términos y confirmación, que activa la wallet. No se recolecta correo. La define Cumplimiento y requiere confirmación de Producto y Cumplimiento antes de producción; al ser configuración, cambiarla no exige cambios de código. Tres pasos favorecen la meta de 3 min.
+### D2. El escenario determina el resultado
+`KycScenario` traduce cada escenario al estado resultante: `APPROVED` a `ACTIVE`, `REJECTED` a `REJECTED`, `MANUAL_REVIEW` a `PENDING`; `UNAVAILABLE` no tiene estado y falla con `KYC_UNAVAILABLE`. La solicitud se valida antes de crear nada: `documentType` `TEST` y `document` con prefijo `TEST-`. La creación de wallet, verificación y caso de soporte ocurre en una transacción, de modo que un fallo no deja datos parciales.
 
-### D3. Modelo de estado y persistencia
-Agregado `Onboarding` con estados `IN_PROGRESS`, `COMPLETED` y `ABANDONED`, paso actual, última actividad y atribución. Las transiciones usan actualización condicional por estado y `@Version`. Un usuario tiene como máximo un onboarding `IN_PROGRESS`. La wallet (módulo `wallet`) pasa a `ACTIVE` en la misma transacción que `onboarding_completed`. Migraciones Flyway aditivas.
+### D3. Módulos aislados por puertos
+`onboarding` no conoce a `wallet`: crea y cambia el estado de la wallet a través de `WalletProvisioningPort`, cuyo adaptador usa los casos de uso de `wallet`. El caso de soporte pasa por `SupportCasePort`. `wallet` tampoco depende de `onboarding`. Pruebas ArchUnit lo exigen, además de que `domain` no dependa de Spring, de aplicación ni de adaptadores.
 
-### D4. Frontera de duración (Decisión provisional)
-Duración = marca de tiempo del servidor de `onboarding_completed` menos la de `onboarding_started`, mediana sobre completados de la cohorte. Esperas del usuario (por ejemplo, recibir el OTP) cuentan dentro de la duración. Pendiente de confirmación de Producto sobre si el inicio es la apertura de la app o el primer paso.
+### D4. Decisión con resultado final único
+`KycVerification.decide` aplica la decisión sobre una verificación `PENDING`, conserva el resultado si se repite la misma y falla con `DECISION_CONFLICT` si contradice una decisión final. La decisión lee la verificación con bloqueo de fila (`SELECT … FOR UPDATE`) dentro de la transacción, de modo que decisiones simultáneas contrarias se serializan. Una prueba de concurrencia falla si se quita el bloqueo.
 
-### D5. Idempotencia con `Idempotency-Key`
-El inicio y la confirmación final aceptan `Idempotency-Key`. Se guarda la respuesta por clave y onboarding, y una repetición devuelve la respuesta original. El cliente genera un UUID por intento de envío y lo reutiliza en reintentos. Cuando falta la clave en la confirmación, la propia máquina de estados la hace idempotente: confirmar un onboarding ya completado devuelve la wallet activa.
+### D5. Datos del proveedor simulado
+`wallet-demo` se precarga por migración `ACTIVE` con 100000 céntimos. Los importes son enteros en céntimos y `available = balance - reserved`; `reserved` vale 0 mientras no existan pagos `PENDING` (W2).
 
-### D6. Definición de MAU (Decisión provisional)
-MAU = usuarios distintos con al menos un `payment_succeeded` (evento de activación de `payment-core`) en el mes calendario de `America/Lima`. `app_opened` se registra como señal complementaria, no entra en el MAU. Pendiente de confirmación de Producto.
+### D6. Latencia simulada y límite de cuerpo en filtros
+Dos filtros de servlet, con errores escritos en el formato del contrato: `MockLatencyFilter` aplica `X-Mock-Latency-Ms` o `latency` (0 a 5000 ms, el header gana, ambos deben ser válidos) y devuelve `INVALID_MOCK_LATENCY` antes de ejecutar la operación; `BodySizeLimitFilter` rechaza con `413` los cuerpos declarados mayores a 65536 bytes.
 
-### D7. Eventos con outbox y lista blanca
-Los eventos se insertan en una tabla outbox dentro de la misma transacción del cambio de estado y un despachador los publica. Un validador con lista blanca de campos rechaza cualquier evento con campos fuera de ella; los logs son estructurados y enmascaran campos sensibles. Alternativa descartada: publicar tras confirmar; puede perder el evento.
-
-### D8. Abandono con job y reloj inyectado
-Un proceso periódico marca como `ABANDONED` los onboardings `IN_PROGRESS` sin actividad por más de `ONBOARDING_ABANDON_HOURS` (24 h por defecto) y emite un único `onboarding_abandoned`. El tiempo se obtiene de un `Clock` inyectado para probar sin esperas. Un onboarding abandonado no se reanuda: se inicia uno nuevo. Esto mantiene un único evento de cierre por onboarding y una duración bien definida.
-
-### D9. Adquisición, gasto y CAC
-El cliente lee `channel`, `campaign` y `ref` de la URL de entrada y los envía al iniciar; sin parámetros el canal es "directo". El gasto se registra por una operación con mes, canal, campaña y monto en céntimos. El CAC se calcula en `analytics` como gasto total del mes entre nuevos usuarios activos, con resultado no disponible si no hay activaciones, y con desglose por canal y campaña. La agrupación mensual usa `America/Lima`.
-
-### D10. Proveedores simulados
-Puertos `OtpProviderPort` e `IdentityValidationPort` con adaptadores fake configurables. El OTP fake usa un código fijo (`OTP_FAKE_CODE`). Una integración real posterior implementa el mismo puerto.
-
-### D11. Contrato y frontend
-`docs/architecture/openapi.yaml` es el contrato *contract-first*: errores de validación por campo en formato Problem Details (RFC 9457) y cabecera `Idempotency-Key`. En Angular, componentes standalone con `OnPush`, formularios reactivos tipados, validación local de respuesta inmediata y mapeo de los errores del servidor a cada control, y un interceptor que agrega `Idempotency-Key`.
+### D7. Registros sin datos del documento
+Los logs son estructurados y no incluyen el documento enviado. Un conversor de logback enmascara fechas y números largos como red de seguridad, y una prueba falla si el documento aparece en los registros.
 
 ## Risks / Trade-offs
 
-- [La secuencia de KYC puede cambiar por Cumplimiento] → Es configuración (D1, D2); las validaciones de formato están en reglas aisladas y reutilizables.
-- [Mediana medida con esperas de OTP incluidas puede sobreestimar la duración] → Los eventos por paso permiten medir tiempo por paso y reevaluar D4 sin cambiar la captura.
-- [MAU depende de `payment_succeeded`, de otro cambio] → Hasta que `payment-core` exista el MAU es cero; las pruebas usan eventos sintéticos.
-- [Un onboarding abandonado no reanuda y el usuario repite datos] → Compromiso aceptado para mantener métricas limpias; se reevalúa con los datos de abandono por paso.
-- [Eventos con datos personales por error] → Lista blanca con prueba que falla ante campos nuevos no autorizados.
-- [Uso de OTP fake en producción] → El fake solo se activa por perfil de configuración y la aplicación no arranca con el fake en el perfil de producción.
+- [Los códigos `INVALID_REQUEST` y `PAYLOAD_TOO_LARGE` no están definidos por el contrato] → Son elecciones de este cambio; confirmarlas con quien consume el mock.
+- [El `413` solo evalúa el `Content-Length` declarado] → Basta para los JSON pequeños del contrato; un cuerpo por *chunks* no se corta en el filtro.
+- [Las altas repetidas crean wallets duplicadas] → Comportamiento exigido por el contrato ("No evita altas repetidas").
+- [El frontend sigue el flujo anterior y no funciona contra este backend] → Realineación pendiente (sección 5 de `tasks.md`).
 
 ## Open Questions
 
-- ¿Cumplimiento exige pasos o documentos adicionales de KYC? Cambia solo la configuración de D2.
-- ¿Qué mecanismo de sesión se usa tras el onboarding? Pertenece a un cambio posterior.
+- ¿Debe `GET /support/cases` (W5) exponerse en este cambio? Hoy solo se guarda el caso al abrirlo y resolverlo.
+- ¿Los códigos `INVALID_REQUEST` y `PAYLOAD_TOO_LARGE` coinciden con los que espera quien consume el mock?

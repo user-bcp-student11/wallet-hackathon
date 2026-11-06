@@ -1,0 +1,41 @@
+<div class="home">
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="eyebrow"><span class="dot"></span>{{ t.eyebrow }}</p>
+    <h1 id="hero-title" tabindex="-1">
+      {{ t.titleLine1 }}<br />
+      {{ t.titleLine2 }} <span class="highlight">{{ t.titleHighlight }}</span>
+    </h1>
+    <p class="lead">{{ t.lead }}</p>
+
+    <div class="promo">
+      <p class="promo__brand"><app-icon name="sparkle" [size]="16" /> Al toque</p>
+      <p class="eyebrow promo__eyebrow">{{ t.promoEyebrow }}</p>
+      <h2 class="promo__title">{{ t.promoTitle }}</h2>
+      <p class="promo__body">{{ t.promoBody }}</p>
+      <ul class="chips">
+        <li><app-icon name="qr" [size]="16" />{{ t.promoQr }}</li>
+        <li><app-icon name="transfer" [size]="16" />{{ t.promoTransfers }}</li>
+      </ul>
+      <a class="promo__cta" routerLink="/registro">{{ t.promoCta }} <app-icon name="arrow-right" [size]="16" /></a>
+    </div>
+  </section>
+
+  <section class="card welcome" aria-labelledby="welcome-title">
+    <span class="welcome__mark"><app-icon name="sparkle" [size]="22" /></span>
+    <p class="eyebrow">{{ t.cardEyebrow }}</p>
+    <h2 id="welcome-title" class="welcome__title">{{ t.cardTitle }}</h2>
+    <p class="muted">{{ t.cardBody }}</p>
+    <hr />
+    <h3 class="welcome__subtitle">{{ t.noAccountTitle }}</h3>
+    <p class="muted small">{{ t.noAccountBody }}</p>
+    <div class="actions">
+      <a class="btn btn--primary" routerLink="/registro">
+        {{ t.register }} <app-icon name="arrow-right" [size]="18" />
+      </a>
+      <a class="btn btn--secondary" routerLink="/registro">
+        {{ t.activate }} <app-icon name="arrow-right" [size]="18" />
+      </a>
+    </div>
+    <p class="disclaimer">{{ t.disclaimer }}</p>
+  </section>
+</div>

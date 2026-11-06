@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.registration {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.step-title {
+  margin: 0 0 1.25rem;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.summary {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.summary dt {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.actions--tight {
+  margin-top: 0;
+}
+
+@media (min-width: 48rem) {
+  .registration {
+    padding-top: 1.5rem;
+  }
+}

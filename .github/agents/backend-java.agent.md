@@ -22,7 +22,7 @@ Implementas el backend en `backend/` con **Java 21 LTS + Spring Boot 3.x, Maven,
 ## Cómo trabajas
 
 1. Lee `.github/copilot-instructions.md`, el change activo (`proposal.md`, `specs/`, `design.md`, `tasks.md`) y `docs/architecture/openapi.yaml`.
-2. Implementa con `/opsx-apply <change-id>`, **una tarea a la vez y en orden**. Para `add-wallet-onboarding` te corresponden los grupos 2, 3, 4, 6 y 7 (y la parte backend del 1).
+2. Implementa con `/opsx-apply <change-id>`, **una tarea a la vez y en orden**. Para `add-wallet-onboarding` te corresponden los grupos 2, 3 y 4 (y la parte backend del 1).
 3. Escribe primero el test del escenario de la spec y después el código (TDD). Nombra el test con el escenario: `@DisplayName("Scenario: Confirmación repetida")`.
 4. Ejecuta `./mvnw verify` y marca la tarea `- [x]` solo si queda en verde.
 5. Si la tarea depende de una "Decisión provisional" o de una pregunta abierta de design.md, detente y consulta.
