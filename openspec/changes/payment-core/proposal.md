@@ -28,8 +28,8 @@ La épica del MVP de wallet en Perú depende de un núcleo de pagos confiable: e
 
 ## Impact
 
-- Código: nuevo núcleo de pagos (dominio, casos de uso, puertos y adaptadores). No hay código previo en el repositorio.
+- Código: nuevo módulo `payments` en `backend/` (dominio, casos de uso, puertos y adaptadores) con migraciones Flyway sobre PostgreSQL. No hay código previo en el repositorio.
 - Dependencias: ningún proveedor real; el adaptador simulado reemplaza la integración contractual hasta que exista una.
 - Cambios posteriores que se apoyan en este: W2, W3, W4, W6 y el onboarding.
 - Supuestos que se registran como configurables y se confirman con producto y operaciones: ventana de intento (5 min), tiempo de expiración de `PENDING` (5 min) y retención de registros de idempotencia (24 h).
-- Pila tecnológica sin definir en los documentos; el diseño queda agnóstico y propone una arquitectura de puertos y adaptadores.
+- Pila alineada con `add-wallet-onboarding`: Java 21, Spring Boot 3.x, Maven, PostgreSQL y Flyway, en un monolito modular hexagonal.

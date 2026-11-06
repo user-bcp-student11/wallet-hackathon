@@ -2,9 +2,9 @@
 
 ## 1. Andamiaje del proyecto
 
-- [ ] 1.1 Crear el proyecto Maven con Spring Boot, Java 21 y JUnit 5, con paquetes `domain`, `application`, `adapters` y `composition`, y verificar que `mvn verify` compila y pasa una prueba de arranque del contexto
-- [ ] 1.2 Agregar dependencias (web, validación, persistencia, migraciones, H2, PostgreSQL, Testcontainers) y verificar que `mvn verify` resuelve todas sin errores
-- [ ] 1.3 Agregar una prueba de arquitectura que falle si `domain` o `application` importan clases de `adapters` o de Spring, y verificar que pasa en el proyecto vacío
+- [ ] 1.1 Crear (o reutilizar si `add-wallet-onboarding` ya lo creó) el proyecto `backend/` con Spring Boot, Java 21 y JUnit 5, y añadir el módulo `payments` hexagonal (`domain`, `application`, `adapters.in.web`, `adapters.out.persistence`, `adapters.out.provider`), y verificar que `./mvnw verify` compila y pasa una prueba de arranque del contexto
+- [ ] 1.2 Agregar las dependencias que falten (web, validación, persistencia, Flyway, PostgreSQL, Testcontainers) y verificar que `./mvnw verify` resuelve todas sin errores
+- [ ] 1.3 Agregar (o ampliar) la prueba ArchUnit para que falle si `domain` o `application` de `payments` importan clases de adaptadores o de Spring, y verificar que pasa sobre el esqueleto
 
 ## 2. Dominio de pagos (`payment-lifecycle`)
 
@@ -27,9 +27,9 @@
 
 ## 5. Persistencia relacional
 
-- [ ] 5.1 Crear las migraciones del esquema (pagos, historial, idempotencia, duplicados, discrepancias, bandeja de salida) que apliquen en H2 y PostgreSQL, y verificar que se aplican limpias en ambos
+- [ ] 5.1 Crear las migraciones del esquema (pagos, historial, idempotencia, duplicados, discrepancias, bandeja de salida) con Flyway, y verificar que se aplican limpias sobre PostgreSQL con Testcontainers
 - [ ] 5.2 Implementar el repositorio con transición condicional desde `PENDING` y restricción de unicidad de la clave activa, y verificar con pruebas de integración de round-trip y de transición condicional
-- [ ] 5.3 Probar la concurrencia: solicitudes simultáneas con la misma clave crean un solo pago, y callback contra expiración deja un solo resultado terminal; verificar con pruebas de integración contra H2 y contra PostgreSQL con Testcontainers
+- [ ] 5.3 Probar la concurrencia: solicitudes simultáneas con la misma clave crean un solo pago, y callback contra expiración deja un solo resultado terminal; verificar con pruebas de integración contra PostgreSQL con Testcontainers
 - [ ] 5.4 Implementar la retención configurable de registros de idempotencia y duplicados (24 h por defecto), y verificar con una prueba de "Consulta dentro del periodo de retención" y otra de limpieza fuera del periodo
 
 ## 6. Proveedor simulado (`payment-provider-gateway`)
@@ -58,7 +58,7 @@
 ## 10. Verificación de extremo a extremo
 
 - [ ] 10.1 Probar por la API con el simulador los recorridos: pago exitoso, fallo con código y reintento, silencio con expiración, duplicado dentro de la ventana y éxito tardío tras expiración registrado como discrepancia, y verificar que cada recorrido deja el estado, los eventos y los registros esperados
-- [ ] 10.2 Ejecutar `openspec validate payment-core` y `mvn verify` completos y verificar que ambos terminan sin errores
+- [ ] 10.2 Ejecutar `./mvnw verify` y `openspec validate payment-core --strict` completos y verificar que ambos terminan sin errores
 
 ## Workflow follow-up
 
