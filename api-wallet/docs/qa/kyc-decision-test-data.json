@@ -1,0 +1,45 @@
+{
+  "setup": {
+    "description": "1) Crear una verificación en revisión manual (devuelve un id kyc-... con status PENDING). Solo ese estado admite decisión.",
+    "request": "POST /kyc/verifications",
+    "body": { "documentType": "TEST", "document": "TEST-0001", "scenario": "MANUAL_REVIEW" }
+  },
+  "decision": {
+    "request": "POST /kyc/verifications/{id}/decision",
+    "cases": [
+      {
+        "name": "Aprobar -> 200, status ACTIVE",
+        "body": { "decision": "ACTIVE" }
+      },
+      {
+        "name": "Rechazar -> 200, status REJECTED (usar otra verificación PENDING)",
+        "body": { "decision": "REJECTED" }
+      },
+      {
+        "name": "Repetir la misma decisión -> 200 idempotente, sin cambios",
+        "body": { "decision": "ACTIVE" }
+      },
+      {
+        "name": "Contradecir una decisión final (ACTIVE tras REJECTED o viceversa) -> conflicto",
+        "body": { "decision": "REJECTED" }
+      },
+      {
+        "name": "Decisión inválida -> error de validación",
+        "body": { "decision": "MAYBE" }
+      },
+      {
+        "name": "Decisión ausente -> error de validación",
+        "body": {}
+      },
+      {
+        "name": "Id inexistente (path: kyc-no-existe) -> no encontrado",
+        "body": { "decision": "ACTIVE" }
+      }
+    ]
+  },
+  "example": {
+    "id": "kyc-457af8d6-8e46-421a-8137-acd83de02337",
+    "note": "Id PENDING generado en la instancia en memoria actual; se pierde al reiniciar el backend.",
+    "curl": "curl -X POST http://localhost:8090/kyc/verifications/kyc-457af8d6-8e46-421a-8137-acd83de02337/decision -H \"Content-Type: application/json\" -d \"{\\\"decision\\\":\\\"ACTIVE\\\"}\""
+  }
+}
