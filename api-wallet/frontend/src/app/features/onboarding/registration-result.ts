@@ -2,12 +2,14 @@ import { Component, ElementRef, afterRenderEffect, computed, input, output, view
 import { ApiError } from '../../core/api/api-error';
 import { Kyc, Wallet } from '../../core/api/kyc.models';
 import { MESSAGES, errorMessage } from '../../core/i18n/messages.es-pe';
+import { RouterLink } from '@angular/router';
 import { PenCentsPipe } from '../../shared/format/pen-cents.pipe';
+import { Icon } from '../../shared/ui/icon';
 
 /** Resultado del registro según el estado de la verificación: ACTIVE, PENDING o REJECTED. */
 @Component({
   selector: 'app-registration-result',
-  imports: [PenCentsPipe],
+  imports: [PenCentsPipe, RouterLink, Icon],
   templateUrl: './registration-result.html',
   styleUrl: './registration-result.css',
 })

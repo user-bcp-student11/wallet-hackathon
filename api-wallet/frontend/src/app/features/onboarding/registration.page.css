@@ -2,61 +2,53 @@
   display: block;
 }
 
+.registration {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
 h1 {
-  margin: 0 0 0.75rem;
-  font-size: 1.625rem;
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
 }
 
-h1:focus {
-  outline: none;
-}
-
-.intro {
-  margin: 0 0 1.5rem;
-  color: var(--color-muted);
-}
-
-.field {
-  margin-bottom: 1.25rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.375rem;
-  font-weight: 600;
-}
-
-.hint {
-  margin: 0.25rem 0 0;
+.step-title {
+  margin: 0 0 1.25rem;
   color: var(--color-muted);
   font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
-input[readonly] {
-  background: var(--color-surface-muted);
-}
-
-input[aria-invalid='true'] {
-  border-color: var(--color-danger);
-}
-
-.alert {
-  margin-bottom: 1.5rem;
+.summary {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
   padding: 1rem;
-  border: 2px solid var(--color-danger);
-  border-radius: 0.5rem;
-  background: var(--color-danger-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
 }
 
-.alert p {
-  margin: 0 0 0.75rem;
+.summary dt {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
 }
 
-.alert:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
-form .btn {
-  width: 100%;
+.actions--tight {
+  margin-top: 0;
+}
+
+@media (min-width: 48rem) {
+  .registration {
+    padding-top: 1.5rem;
+  }
 }
