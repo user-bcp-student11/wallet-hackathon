@@ -1,13 +1,10 @@
 package com.wallet.wallet.adapters.out.persistence;
 
-import com.wallet.shared.domain.UserId;
+import com.wallet.shared.domain.WalletId;
 import com.wallet.wallet.application.port.out.WalletRepositoryPort;
 import com.wallet.wallet.domain.Wallet;
 import com.wallet.wallet.domain.WalletStatus;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -21,25 +18,32 @@ public class JdbcWalletRepository implements WalletRepositoryPort {
     }
 
     @Override
-    public Optional<Wallet> findByUser(UserId userId) {
-        return jdbc.sql("SELECT user_id, status, activated_at FROM wallets WHERE user_id = :userId")
-                .param("userId", userId.value())
+    public void insert(Wallet wallet) {
+        jdbc.sql("INSERT INTO wallets (id, status, balance, reserved) VALUES (:id, :status, :balance, :reserved)")
+                .param("id", wallet.id().value())
+                .param("status", wallet.status().name())
+                .param("balance", wallet.balance())
+                .param("reserved", wallet.reserved())
+                .update();
+    }
+
+    @Override
+    public Optional<Wallet> findById(WalletId id) {
+        return jdbc.sql("SELECT id, status, balance, reserved FROM wallets WHERE id = :id")
+                .param("id", id.value())
                 .query((rs, rowNum) -> new Wallet(
-                        UserId.of(rs.getObject("user_id", UUID.class)),
+                        WalletId.of(rs.getString("id")),
                         WalletStatus.valueOf(rs.getString("status")),
-                        rs.getObject("activated_at", OffsetDateTime.class).toInstant()))
+                        rs.getLong("balance"),
+                        rs.getLong("reserved")))
                 .optional();
     }
 
     @Override
-    public void insertIfAbsent(Wallet wallet) {
-        jdbc.sql("""
-                        INSERT INTO wallets (user_id, status, activated_at) VALUES (:userId, :status, :at)
-                        ON CONFLICT (user_id) DO NOTHING
-                        """)
-                .param("userId", wallet.userId().value())
-                .param("status", wallet.status().name())
-                .param("at", OffsetDateTime.ofInstant(wallet.activatedAt(), ZoneOffset.UTC))
+    public void updateStatus(WalletId id, WalletStatus status) {
+        jdbc.sql("UPDATE wallets SET status = :status WHERE id = :id")
+                .param("status", status.name())
+                .param("id", id.value())
                 .update();
     }
 }

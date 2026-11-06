@@ -2,158 +2,121 @@
 
 ## Purpose
 
-Guía al usuario por un onboarding de pasos definidos por el servidor, valida sus datos con reglas de Perú, bloquea el avance con mensajes accionables, y activa la wallet al completarlo para habilitar el punto de entrada de pagos de bajo monto.
+Simula la verificación de identidad (KYC) y crea la wallet del usuario, de modo que el registro distinga una cuenta activa, una pendiente de revisión y una rechazada. El contrato HTTP es `backend/src/main/resources/openapi-wallet.yml` (tag "W1 · Registro y activación"), que es la fuente de verdad. Los importes van en céntimos de PEN.
 
 ## ADDED Requirements
 
-### Requirement: Definición de pasos provista por el servidor
-El sistema SHALL entregar al cliente la secuencia ordenada de pasos del onboarding, el paso actual, el total de pasos y el estado de cada paso (completado, actual o pendiente). El cliente SHALL NOT codificar la secuencia de pasos.
+### Requirement: Creación de una verificación KYC simulada
+El sistema SHALL crear, con `POST /kyc/verifications`, una verificación y una wallet con saldo cero, y devolver `201` con `id`, `wallet_id`, `scenario` y `status`. El campo `scenario` es opcional y su valor predeterminado es `APPROVED`. El sistema SHALL aceptar únicamente `documentType` `TEST` y un `document` con prefijo `TEST-`, y SHALL NOT evitar altas repetidas.
 
-#### Scenario: Secuencia por defecto
-- **WHEN** el cliente consulta un onboarding recién iniciado
-- **THEN** recibe los pasos configurados en orden, con el primero como actual y los demás como pendientes
+#### Scenario: Escenario aprobado
+- **WHEN** se envía `{"documentType":"TEST","document":"TEST-001","scenario":"APPROVED"}`
+- **THEN** la verificación queda `ACTIVE` y la wallet creada queda `ACTIVE` con saldo cero
 
-#### Scenario: Cambio de configuración
-- **WHEN** el servidor se configura con una secuencia de pasos distinta
-- **THEN** el cliente muestra la nueva secuencia sin cambios en el código del cliente
+#### Scenario: Escenario omitido
+- **WHEN** se envía la solicitud sin `scenario`
+- **THEN** se aplica `APPROVED`
 
-### Requirement: Progreso y siguiente paso visibles
-La interfaz SHALL mostrar en todo momento el indicador "Paso X de N", la lista de pasos con su estado, y la instrucción y etiqueta del siguiente paso, con una única acción principal por pantalla.
+#### Scenario: Escenario rechazado
+- **WHEN** el escenario es `REJECTED`
+- **THEN** la verificación y la wallet quedan `REJECTED`
 
-#### Scenario: Paso intermedio
-- **WHEN** el usuario está en el segundo de tres pasos
-- **THEN** la pantalla muestra "Paso 2 de 3", el primer paso como completado y el tercero como pendiente
+#### Scenario: Revisión manual
+- **WHEN** el escenario es `MANUAL_REVIEW`
+- **THEN** la verificación y la wallet quedan `PENDING`
+- **AND** se abre un caso de soporte `OPEN` por revisión KYC
 
-#### Scenario: Último paso
-- **WHEN** el usuario está en el último paso
-- **THEN** la acción principal indica que finaliza el registro
+#### Scenario: Proveedor no disponible
+- **WHEN** el escenario es `UNAVAILABLE`
+- **THEN** la respuesta es `503` con el error `KYC_UNAVAILABLE`
+- **AND** no se crea ninguna wallet, verificación ni caso de soporte
 
-### Requirement: Inicio idempotente del onboarding
-El sistema SHALL crear un onboarding al iniciarlo y devolver el onboarding en curso si el mismo usuario lo inicia de nuevo con la misma clave de idempotencia o recarga la aplicación, sin crear uno nuevo.
+#### Scenario: Entrada inválida
+- **WHEN** el `documentType` no es `TEST`, el `document` no tiene prefijo `TEST-` o el `scenario` es desconocido
+- **THEN** la respuesta es `400` y no se crea ninguna wallet
 
-#### Scenario: Recarga durante el onboarding
-- **WHEN** el usuario recarga la aplicación con un onboarding en curso
-- **THEN** el sistema devuelve el mismo onboarding en su paso actual
-- **AND** no se crea un onboarding nuevo
+#### Scenario: Altas repetidas
+- **WHEN** se envía dos veces la misma solicitud
+- **THEN** se crean dos verificaciones y dos wallets independientes
 
-#### Scenario: Inicio repetido con la misma clave
-- **WHEN** llegan dos solicitudes de inicio con la misma clave de idempotencia
-- **THEN** ambas devuelven el mismo onboarding
+### Requirement: Consulta de una verificación KYC
+El sistema SHALL devolver, con `GET /kyc/verifications/{id}`, la verificación identificada por su ID kyc, que es distinto del `wallet_id`.
 
-### Requirement: Orden estricto de los pasos
-El sistema SHALL aceptar únicamente el envío del paso actual y SHALL rechazar el envío de un paso posterior o ya completado.
+#### Scenario: Verificación existente
+- **WHEN** se consulta el ID de una verificación creada
+- **THEN** la respuesta es `200` con `id`, `wallet_id`, `scenario` y `status`
 
-#### Scenario: Salto de paso
-- **WHEN** el cliente envía datos de un paso posterior al actual
-- **THEN** el sistema rechaza la solicitud e indica cuál es el paso actual
+#### Scenario: Verificación inexistente
+- **WHEN** se consulta un ID inexistente o el `wallet_id` en lugar del ID kyc
+- **THEN** la respuesta es `404` con el error `NOT_FOUND`
 
-### Requirement: Bloqueo del avance ante datos faltantes o inválidos
-El sistema SHALL bloquear el avance al siguiente paso si falta información obligatoria o hay datos inválidos, y SHALL devolver un error por cada campo afectado con un mensaje en español que indique cómo corregirlo. Los datos ya ingresados SHALL conservarse.
+### Requirement: Decisión sobre una verificación en revisión
+El sistema SHALL aceptar, con `POST /kyc/verifications/{id}/decision`, la decisión `ACTIVE` o `REJECTED` sobre una verificación `PENDING`, actualizar el estado de su wallet y resolver su caso de soporte. Repetir la misma decisión SHALL devolver `200` y cambiar una decisión final SHALL devolver `409` con el error `DECISION_CONFLICT`. Las decisiones simultáneas contrarias SHALL dejar un único resultado final.
 
-#### Scenario: Campo obligatorio vacío
-- **WHEN** el usuario envía un paso sin un campo obligatorio
-- **THEN** el paso no avanza
-- **AND** la respuesta lista el campo faltante con un mensaje accionable
+#### Scenario: Decisión de activación
+- **WHEN** se decide `ACTIVE` sobre una verificación `PENDING`
+- **THEN** la verificación y su wallet quedan `ACTIVE` y el caso de soporte queda `RESOLVED`
 
-#### Scenario: Varios campos inválidos
-- **WHEN** el usuario envía un paso con dos campos inválidos
-- **THEN** la respuesta contiene un error por cada campo
-- **AND** los valores ingresados siguen disponibles para corregirlos
+#### Scenario: Decisión de rechazo
+- **WHEN** se decide `REJECTED` sobre una verificación `PENDING`
+- **THEN** la verificación y su wallet quedan `REJECTED` y el caso de soporte queda `RESOLVED`
 
-#### Scenario: Validación local insuficiente
-- **WHEN** el cliente envía datos que su validación local habría bloqueado
-- **THEN** el servidor aplica igualmente sus reglas y rechaza los datos inválidos
+#### Scenario: Decisión repetida
+- **WHEN** se repite la decisión ya tomada
+- **THEN** la respuesta es `200` y el resultado se conserva
 
-### Requirement: Reglas de validación de datos del usuario
-El sistema SHALL aplicar en el servidor estas reglas: el celular tiene 9 dígitos y empieza con 9; el DNI tiene exactamente 8 dígitos; el carné de extranjería (CE) se acepta como tipo de documento alternativo con su formato; el usuario es mayor de edad; los nombres no están vacíos.
+#### Scenario: Cambio de una decisión final
+- **WHEN** se decide algo distinto de la decisión final ya tomada
+- **THEN** la respuesta es `409` con el error `DECISION_CONFLICT` y el estado no cambia
 
-#### Scenario: Celular con formato inválido
-- **WHEN** el usuario ingresa un celular de 9 dígitos que empieza con 8
-- **THEN** el sistema lo rechaza con un mensaje que indica que debe empezar con 9
+#### Scenario: Decisión inválida
+- **WHEN** la decisión no es `ACTIVE` ni `REJECTED`
+- **THEN** la respuesta es `400` con el error `INVALID_DECISION`
 
-#### Scenario: DNI con longitud incorrecta
-- **WHEN** el usuario ingresa un DNI de 7 o de 9 dígitos
-- **THEN** el sistema lo rechaza con un mensaje que indica que debe tener 8 dígitos
+#### Scenario: Verificación inexistente
+- **WHEN** se decide sobre un ID inexistente
+- **THEN** la respuesta es `404` con el error `NOT_FOUND`
 
-#### Scenario: Usuario menor de edad
-- **WHEN** la fecha de nacimiento corresponde a una persona menor de 18 años
-- **THEN** el sistema bloquea el avance e indica que debe ser mayor de edad
+#### Scenario: Decisiones simultáneas contrarias
+- **WHEN** llegan a la vez decisiones `ACTIVE` y `REJECTED` sobre la misma verificación
+- **THEN** solo una prevalece y la wallet y el caso de soporte coinciden con ella
 
-#### Scenario: Documento CE válido
-- **WHEN** el usuario elige CE e ingresa un número con el formato esperado
-- **THEN** el sistema acepta el documento
+### Requirement: Consulta del estado y saldos de una wallet
+El sistema SHALL devolver, con `GET /wallets/{id}`, el estado y los saldos en céntimos de la wallet, con `available = balance - reserved` y `currency` `PEN`. La wallet `wallet-demo` SHALL existir precargada `ACTIVE` con saldo 100000.
 
-### Requirement: Verificación del celular con OTP
-El sistema SHALL solicitar al usuario un código de un solo uso enviado al celular y SHALL avanzar solo si el código ingresado es correcto. El envío del código SHALL pasar por un proveedor sustituible.
+#### Scenario: Wallet precargada
+- **WHEN** se consulta `wallet-demo`
+- **THEN** la respuesta es `200` con estado `ACTIVE`, `balance` 100000, `reserved` 0 y `available` 100000
 
-#### Scenario: Código correcto
-- **WHEN** el usuario ingresa el código correcto
-- **THEN** el paso de verificación se completa y el onboarding avanza
+#### Scenario: Saldo disponible
+- **WHEN** una wallet tiene `balance` 50000 y `reserved` 12000
+- **THEN** `available` es 38000
 
-#### Scenario: Código incorrecto
-- **WHEN** el usuario ingresa un código incorrecto
-- **THEN** el paso no avanza y se muestra un mensaje para reintentar
+#### Scenario: Wallet inexistente
+- **WHEN** se consulta una wallet inexistente
+- **THEN** la respuesta es `404` con el error `NOT_FOUND`
 
-#### Scenario: Proveedor simulado
-- **WHEN** el sistema usa el proveedor simulado con un código fijo configurado
-- **THEN** ese código se acepta como correcto
+### Requirement: Latencia simulada por solicitud
+El sistema SHALL retrasar la respuesta de cualquier operación, también en errores, el número de milisegundos indicado en el header `X-Mock-Latency-Ms` o en el parámetro `latency` (entero de 0 a 5000, predeterminado 0), con prioridad del header. Un valor inválido SHALL devolver `400` con el error `INVALID_MOCK_LATENCY` antes de ejecutar la operación.
 
-### Requirement: Abandono por inactividad
-El sistema SHALL marcar como abandonado un onboarding en curso sin actividad durante un tiempo configurable. El valor por defecto es de 24 horas. Un onboarding abandonado SHALL NOT poder continuarse; el usuario inicia uno nuevo.
+#### Scenario: Latencia válida
+- **WHEN** se envía `X-Mock-Latency-Ms: 300`
+- **THEN** la respuesta tarda al menos 300 ms y el header de respuesta informa el valor aplicado
 
-#### Scenario: Inactividad prolongada
-- **WHEN** transcurre el tiempo configurado sin actividad en un onboarding en curso
-- **THEN** el onboarding pasa a abandonado
+#### Scenario: Latencia inválida
+- **WHEN** el valor es mayor que 5000, negativo o no numérico
+- **THEN** la respuesta es `400` con el error `INVALID_MOCK_LATENCY` y la operación no se ejecuta
 
-#### Scenario: Actividad dentro del plazo
-- **WHEN** el usuario avanza un paso antes de cumplirse el tiempo configurado
-- **THEN** el plazo de inactividad se reinicia
+### Requirement: Límite del tamaño del cuerpo
+El sistema SHALL rechazar con `413` y el error `PAYLOAD_TOO_LARGE` las solicitudes con un cuerpo declarado mayor a 65536 bytes.
 
-#### Scenario: Continuar un onboarding abandonado
-- **WHEN** el usuario intenta enviar un paso de un onboarding abandonado
-- **THEN** el sistema lo rechaza e indica que debe iniciar un onboarding nuevo
+#### Scenario: Cuerpo demasiado grande
+- **WHEN** se envía una solicitud de creación con un cuerpo mayor a 65536 bytes
+- **THEN** la respuesta es `413` y no se crea ninguna wallet
 
-### Requirement: Activación de la wallet al completar el onboarding
-El sistema SHALL cambiar el estado de la wallet a activo cuando el usuario completa con éxito el último paso del onboarding, en la misma operación que marca el onboarding como completado.
+### Requirement: Documento fuera de los registros
+Los registros de aplicación SHALL NOT incluir el documento enviado ni sus valores, incluidos los rechazados por la validación.
 
-#### Scenario: Onboarding completado
-- **WHEN** el usuario completa correctamente el último paso
-- **THEN** la wallet queda en estado activo
-- **AND** el onboarding queda en estado completado
-
-#### Scenario: Onboarding incompleto
-- **WHEN** el usuario no ha completado todos los pasos
-- **THEN** la wallet no pasa a estado activo
-
-### Requirement: Confirmación idempotente de la activación
-El sistema SHALL tratar de forma idempotente la confirmación final: repetirla con la misma clave de idempotencia, o después de completada, devuelve la wallet activa sin duplicar la activación.
-
-#### Scenario: Confirmación repetida
-- **WHEN** el cliente envía dos veces la confirmación final con la misma clave de idempotencia
-- **THEN** ambas respuestas son iguales y la wallet se activa una sola vez
-
-#### Scenario: Confirmación tras completar
-- **WHEN** se envía la confirmación final de un onboarding ya completado
-- **THEN** el sistema devuelve la wallet activa sin errores ni efectos adicionales
-
-### Requirement: Consulta del estado de la wallet y acceso a pagos
-El sistema SHALL permitir consultar el estado de la wallet de un usuario, distinguiendo los estados sin wallet, onboarding en curso (con el paso actual) y activa. SHALL permitir el acceso al punto de entrada de pagos de bajo monto solo cuando la wallet está activa e informar al usuario qué debe completar cuando no lo está.
-
-#### Scenario: Wallet activa
-- **WHEN** el usuario con wallet activa consulta su acceso a pagos
-- **THEN** el punto de entrada de pagos está habilitado
-
-#### Scenario: Wallet no activa
-- **WHEN** el usuario sin wallet activa intenta acceder al punto de entrada de pagos
-- **THEN** el acceso se deniega con un mensaje que indica completar el onboarding
-
-#### Scenario: Usuario con onboarding en curso
-- **WHEN** se consulta el estado de un usuario con onboarding sin completar
-- **THEN** el estado indica onboarding en curso y el paso actual
-
-### Requirement: Datos personales fuera de los registros
-Los registros de aplicación SHALL NOT incluir DNI, CE, nombres, fecha de nacimiento, celular, código OTP ni valores de formularios, incluidos los valores rechazados por la validación.
-
-#### Scenario: Registro de errores de validación
-- **WHEN** falla la validación de un campo con un valor ingresado
-- **THEN** los registros no contienen el valor ingresado
+#### Scenario: Registro de solicitudes con documento
+- **WHEN** se procesan solicitudes de verificación aceptadas, rechazadas o no disponibles
+- **THEN** los registros no contienen el documento enviado

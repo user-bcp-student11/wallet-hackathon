@@ -1,13 +1,15 @@
 package com.wallet.wallet.application.port.out;
 
-import com.wallet.shared.domain.UserId;
+import com.wallet.shared.domain.WalletId;
 import com.wallet.wallet.domain.Wallet;
+import com.wallet.wallet.domain.WalletStatus;
 import java.util.Optional;
 
 public interface WalletRepositoryPort {
 
-    Optional<Wallet> findByUser(UserId userId);
+    void insert(Wallet wallet);
 
-    /** Crea la wallet si no existe; repetirla no tiene efecto. */
-    void insertIfAbsent(Wallet wallet);
+    Optional<Wallet> findById(WalletId id);
+
+    void updateStatus(WalletId id, WalletStatus status);
 }

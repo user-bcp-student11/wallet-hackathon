@@ -43,11 +43,11 @@ El cambio `add-wallet-onboarding` crea el backend (módulos `onboarding` y `wall
 | Vitest | 4.1.12 | Pruebas unitarias del frontend (`ng test`) |
 | jsdom | 28.1.0 | Entorno DOM de las pruebas del frontend |
 | Playwright | 1.65.0 | E2E en viewport móvil (Chromium, perfil Pixel 7) |
-| Redocly CLI | última disponible al validar | Validación de `openapi.yaml` |
 
 ## Consecuencias
 
 - Cambiar una versión mayor requiere actualizar este documento en el mismo cambio.
 - Spring Boot permanece en 3.x según el diseño; el frontend usa las versiones vigentes de Angular.
 - Las pruebas de integración del backend requieren Docker disponible para Testcontainers.
-- El E2E de Playwright simula el backend con el contrato de `openapi.yaml`; no requiere backend ni base de datos.
+- El contrato HTTP del backend es `backend/src/main/resources/openapi-wallet.yml` (fuente de verdad); el servicio escucha en el puerto 8787.
+- El E2E de Playwright simula el backend y aún modela el flujo por pasos anterior; está pendiente de alinearse con el contrato.

@@ -19,4 +19,14 @@ class HexagonalArchitectureTest {
     static final ArchRule domainDoesNotDependOnAdaptersOrApplication = noClasses()
             .that().resideInAPackage("..domain..")
             .should().dependOnClassesThat().resideInAnyPackage("..adapters..", "..application..");
+
+    @ArchTest
+    static final ArchRule onboardingCoreDoesNotKnowTheWalletModule = noClasses()
+            .that().resideInAnyPackage("com.wallet.onboarding.domain..", "com.wallet.onboarding.application..")
+            .should().dependOnClassesThat().resideInAPackage("com.wallet.wallet..");
+
+    @ArchTest
+    static final ArchRule walletDoesNotKnowTheOnboardingModule = noClasses()
+            .that().resideInAPackage("com.wallet.wallet..")
+            .should().dependOnClassesThat().resideInAPackage("com.wallet.onboarding..");
 }

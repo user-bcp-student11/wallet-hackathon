@@ -1,5 +1,7 @@
 package com.wallet.wallet.domain;
 
 public enum WalletStatus {
-    ACTIVE
+    ACTIVE,
+    PENDING,
+    REJECTED
 }

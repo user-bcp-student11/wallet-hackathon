@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest(properties = "onboarding.abandon-check-interval=PT24H")
+@SpringBootTest
 @AutoConfigureMockMvc
 public abstract class IntegrationTest {
 
@@ -20,11 +20,11 @@ public abstract class IntegrationTest {
         registry.add("spring.datasource.url", TestDatabase::jdbcUrl);
         registry.add("spring.datasource.username", TestDatabase::user);
         registry.add("spring.datasource.password", TestDatabase::password);
-        registry.add("onboarding.otp.fake-code", () -> Fixtures.OTP_CODE);
     }
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.sql("TRUNCATE onboarding_steps, onboardings, idempotency_records, wallets CASCADE").update();
+        jdbc.sql("TRUNCATE support_cases, kyc_verifications").update();
+        jdbc.sql("DELETE FROM wallets WHERE id <> 'wallet-demo'").update();
     }
 }

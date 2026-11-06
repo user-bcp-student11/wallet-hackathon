@@ -1,11 +1,15 @@
 package com.wallet.wallet.domain;
 
-import com.wallet.shared.domain.UserId;
-import java.time.Instant;
+import com.wallet.shared.domain.WalletId;
 
-public record Wallet(UserId userId, WalletStatus status, Instant activatedAt) {
+/** Importes en céntimos de PEN. */
+public record Wallet(WalletId id, WalletStatus status, long balance, long reserved) {
 
-    public static Wallet activate(UserId userId, Instant now) {
-        return new Wallet(userId, WalletStatus.ACTIVE, now);
+    public static Wallet open(WalletId id, WalletStatus status) {
+        return new Wallet(id, status, 0, 0);
+    }
+
+    public long available() {
+        return balance - reserved;
     }
 }

@@ -1,39 +1,35 @@
 package com.wallet.wallet.adapters.in.web;
 
-import com.wallet.shared.domain.UserId;
-import com.wallet.shared.web.UserHeader;
-import com.wallet.wallet.application.CheckPaymentsAccessUseCase;
-import com.wallet.wallet.application.GetWalletStatusUseCase;
-import com.wallet.wallet.application.GetWalletStatusUseCase.WalletStatusView;
-import java.util.UUID;
+import com.wallet.shared.domain.WalletId;
+import com.wallet.wallet.application.GetWalletUseCase;
+import com.wallet.wallet.domain.Wallet;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/wallet")
+@RequestMapping("/wallets")
 public class WalletController {
 
-    private final GetWalletStatusUseCase getWalletStatus;
-    private final CheckPaymentsAccessUseCase checkPaymentsAccess;
+    private static final String CURRENCY = "PEN";
 
-    public WalletController(GetWalletStatusUseCase getWalletStatus, CheckPaymentsAccessUseCase checkPaymentsAccess) {
-        this.getWalletStatus = getWalletStatus;
-        this.checkPaymentsAccess = checkPaymentsAccess;
+    private final GetWalletUseCase getWallet;
+
+    public WalletController(GetWalletUseCase getWallet) {
+        this.getWallet = getWallet;
     }
 
-    @GetMapping
-    public WalletStatusView status(@RequestHeader(UserHeader.NAME) UUID userId) {
-        return getWalletStatus.execute(UserId.of(userId));
+    @GetMapping("/{id}")
+    public WalletResponse get(@PathVariable String id) {
+        return WalletResponse.from(getWallet.execute(WalletId.of(id)));
     }
 
-    @GetMapping("/payments-access")
-    public PaymentsAccessResponse paymentsAccess(@RequestHeader(UserHeader.NAME) UUID userId) {
-        checkPaymentsAccess.execute(UserId.of(userId));
-        return new PaymentsAccessResponse(true);
-    }
+    public record WalletResponse(String id, String status, long balance, long reserved, long available, String currency) {
 
-    public record PaymentsAccessResponse(boolean enabled) {
+        static WalletResponse from(Wallet wallet) {
+            return new WalletResponse(wallet.id().value(), wallet.status().name(), wallet.balance(),
+                    wallet.reserved(), wallet.available(), CURRENCY);
+        }
     }
 }
