@@ -289,18 +289,14 @@
 
     .tag { margin: 0 0 .8rem; color: var(--cyan); }
 
-    .workflow-list {
+    .workflow-diagram {
       display: grid;
-      gap: .65rem;
-      margin: .9rem 0 0;
-      padding: 0;
-      list-style: none;
+      justify-items: stretch;
+      gap: .45rem;
+      margin-top: 1rem;
     }
 
-    .workflow-step {
-      display: grid;
-      grid-template-columns: 2rem minmax(0, 1fr);
-      gap: .75rem;
+    .flow-card {
       min-width: 0;
       padding: .85rem;
       border: 1px solid var(--line);
@@ -308,22 +304,68 @@
       background: rgba(255,255,255,.025);
     }
 
-    .workflow-number {
-      display: grid;
-      width: 2rem;
-      height: 2rem;
-      place-items: center;
-      color: #14202d;
-      background: var(--lime);
-      border-radius: .6rem;
-      font-size: .78rem;
-      font-weight: 850;
+    .flow-card h4 { margin: .2rem 0 .35rem; font-size: .94rem; }
+    .flow-card p { margin: .25rem 0 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+    .flow-card p strong { color: var(--ink); }
+
+    .flow-start {
+      border-color: rgba(200, 241, 105, .38);
+      background: rgba(200, 241, 105, .07);
     }
 
-    .workflow-step h3 { margin: .05rem 0 .35rem; font-size: .97rem; }
-    .workflow-step p { margin: .25rem 0 0; color: var(--muted); font-size: .86rem; line-height: 1.5; }
-    .workflow-step p strong { color: var(--ink); }
-    .workflow-step .workflow-branch { color: #d3e2ef; }
+    .flow-label {
+      color: var(--lime);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .flow-arrow {
+      color: var(--lime);
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .flow-parallel {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .55rem;
+      margin-top: .55rem;
+    }
+
+    .flow-parallel > div {
+      min-width: 0;
+      padding: .65rem;
+      border: 1px solid var(--line);
+      border-radius: .65rem;
+      background: rgba(16, 26, 45, .35);
+    }
+
+    .flow-parallel strong { display: block; color: var(--cyan); font-size: .8rem; }
+    .flow-parallel span { display: block; margin-top: .2rem; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+
+    .flow-branches {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .55rem;
+      margin-top: .65rem;
+    }
+
+    .flow-branch {
+      padding: .65rem;
+      border: 1px solid var(--line);
+      border-radius: .65rem;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.4;
+    }
+
+    .flow-branch strong { display: block; margin-bottom: .2rem; color: var(--ink); }
+    .flow-branch.retry { border-color: rgba(255, 209, 138, .35); }
+    .flow-branch.success { border-color: rgba(200, 241, 105, .35); }
 
     .story-quote {
       padding: clamp(1.25rem, 3vw, 2rem);
@@ -332,6 +374,13 @@
       background: linear-gradient(125deg, rgba(200, 241, 105, .09), rgba(102, 224, 209, .04));
       font-size: clamp(1.12rem, 2.3vw, 1.45rem);
       line-height: 1.55;
+    }
+
+    .story-summary {
+      max-width: 60ch;
+      margin: .9rem 0 1.25rem;
+      color: #d1dbe8;
+      font-size: 1.05rem;
     }
 
     .story-quote strong { color: var(--lime); }
@@ -379,6 +428,7 @@
       .section { width: min(100% - 1.25rem, 1120px); padding: 3.8rem 0; }
       .hero { min-height: auto; padding-top: 4rem; }
       .hero-grid, .grid-2, .grid-3, .roles-grid, .criteria-grid { grid-template-columns: 1fr; }
+      .flow-parallel, .flow-branches { grid-template-columns: 1fr; }
       .card { padding: 1.05rem; }
     }
 
@@ -392,8 +442,8 @@
       .topbar { position: static; background: #fff; }
       nav { display: none; }
       .section { width: 100%; padding: 2rem 0; break-inside: avoid; }
-      .card, .story-quote, .workflow-step { background: #f5f7fa; }
-      .lede, .workflow-step p strong { color: var(--ink); }
+      .card, .story-quote, .flow-card, .flow-parallel > div { background: #f5f7fa; }
+      .lede, .flow-card p strong { color: var(--ink); }
       .footer { color: var(--muted); }
     }
   </style>
@@ -407,9 +457,8 @@
     </a>
     <nav aria-label="Secciones de la presentación">
       <ul>
-        <li><a href="#caso">01 Caso</a></li>
+        <li><a href="#historia">01 Historia</a></li>
         <li><a href="#roles">02 Roles y flujo</a></li>
-        <li><a href="#historia">03 Historia</a></li>
       </ul>
     </nav>
   </header>
@@ -441,39 +490,23 @@
       <div class="callout"><strong>La oportunidad:</strong> acelerar el onboarding y hacer confiables los pagos pequeños y los cobros con QR, sin perder de vista operación, medición y cumplimiento.</div>
     </header>
 
-    <section class="section" id="caso" aria-labelledby="caso-title">
-      <p class="eyebrow">01 · Presentación del caso</p>
-      <h2 id="caso-title">Una wallet sencilla de empezar y confiable de usar.</h2>
-      <p class="lede">La épica apunta a personas que hacen transferencias frecuentes de bajo monto y a pequeños comercios que cobran con QR. El primer paso de esta presentación es completar el onboarding del segmento MVP.</p>
-      <div class="grid-3">
-        <article class="card">
-          <h3>Para las personas</h3>
-          <p>Un recorrido guiado que indica el paso actual, explica qué sigue y ayuda a corregir datos inválidos sin perder lo ingresado.</p>
-        </article>
-        <article class="card">
-          <h3>Para el negocio</h3>
-          <p>Medir inicio, avance y cierre del onboarding, además de activaciones y atribución de adquisición para seguir los objetivos del MVP.</p>
-        </article>
-        <article class="card">
-          <h3>Para operar en Perú</h3>
-          <p>Preparar un producto para un ecosistema multirriel, con límites e integraciones sujetos a acuerdos y definiciones de cumplimiento.</p>
-        </article>
+    <section class="section" id="historia" aria-labelledby="historia-title">
+      <p class="eyebrow">01 · Historia trabajada</p>
+      <h2 id="historia-title">Registro y activación del MVP de wallet</h2>
+      <p class="muted">Historia <code>#w1-user-onboarding-mvp-completion.sp.md</code> · Épica <code>#peru-wallet-mvp.sp.md</code></p>
+      <p class="story-summary">Guía el registro y la activación de la wallet para que usuarios en Perú puedan empezar a pagar sin abandonar.</p>
+      <blockquote class="story-quote">
+        Como <strong>usuario de smartphone que realiza transferencias diarias de bajo monto</strong>, quiero completar el onboarding con un flujo guiado y señales claras de siguiente paso, para poder empezar a pagar sin abandonar el proceso.
+      </blockquote>
+      <h3 style="margin-top:2rem">Criterios de aceptación</h3>
+      <div class="criteria-grid">
+        <article class="card criterion"><b>1</b><p>La secuencia de pasos requeridos y el paso actual se mantienen visibles durante el onboarding.</p></article>
+        <article class="card criterion"><b>2</b><p>La información obligatoria faltante o inválida bloquea el avance y muestra cómo corregirla.</p></article>
+        <article class="card criterion"><b>3</b><p>Al completar el flujo, la wallet pasa a activa y se habilita el acceso a pagos de bajo monto.</p></article>
+        <article class="card criterion"><b>4</b><p>Se registran eventos de inicio, finalización de cada paso y cierre del flujo para analítica.</p></article>
+        <article class="card criterion"><b>5</b><p>La mediana de finalización para la cohorte MVP baja de 8 a 3 minutos dentro del trimestre posterior al lanzamiento.</p></article>
+        <article class="card criterion"><b>6</b><p>La analítica entrega conteos mensuales de nuevos usuarios activos y atribución de gasto para verificar MAU y CAC en meses 1–3.</p></article>
       </div>
-      <div class="grid-2" style="margin-top:1rem">
-        <article class="card">
-          <h3>Éxito de la épica</h3>
-          <ul class="plain-list">
-            <li>MVP lanzado dentro de un trimestre.</li>
-            <li>MAU entre 1,000 y 2,000 durante los primeros tres meses.</li>
-            <li>CAC de PEN 10 por usuario nuevo durante los primeros tres meses.</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>Alcance de esta historia</h3>
-          <p>Onboarding guiado, validación de información, activación de wallet y eventos para observar el funnel. Los pagos de bajo monto son el siguiente punto de entrada, no el alcance de implementación de esta historia.</p>
-        </article>
-      </div>
-      <div class="callout"><strong>Fuera de alcance de la épica:</strong> expansión multipaís, lealtad avanzada, paridad completa entre proveedores desde el día uno y APIs de pago abiertas para terceros.</div>
     </section>
 
     <section class="section" id="roles" aria-labelledby="roles-title">
@@ -519,80 +552,55 @@
         </div>
         <div class="workflow-panel">
           <h3 id="workflow-title">Flujo de trabajo · W1 onboarding</h3>
-          <p class="muted">Del planteamiento del cambio a su aceptación y archivo.</p>
-          <ol class="workflow-list" aria-labelledby="workflow-title">
-            <li class="workflow-step">
-              <span class="workflow-number">1</span>
-              <div>
-                <h3>PROPOSE · Acordar qué construir</h3>
-                <p><strong>Product Owner</strong> convierte la historia W1 en proposal y spec delta con alcance y criterios verificables.</p>
-                <p class="workflow-branch"><strong>Aprueba:</strong> PO valida el alcance; KYC se define con Cumplimiento y la frontera temporal se acuerda antes de implementar.</p>
+          <p class="muted">Ejemplo: así colaboran los roles para completar y verificar el onboarding.</p>
+          <div class="workflow-diagram" role="group" aria-labelledby="workflow-title">
+            <article class="flow-card flow-start">
+              <span class="flow-label">Inicio · Historia W1</span>
+              <h4>El usuario quiere registrarse y empezar a pagar</h4>
+              <p>El onboarding debe guiarlo, validar la información, activar la wallet y medir el recorrido.</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <article class="flow-card">
+              <span class="flow-label">Alinear el resultado</span>
+              <h4>Product Owner define qué significa “completado”</h4>
+              <p>Confirma los criterios de la historia: progreso visible, errores accionables, wallet activa y eventos de onboarding.</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <article class="flow-card">
+              <span class="flow-label">Diseñar y anticipar casos</span>
+              <h4>Arquitectura acuerda el contrato; QA y Seguridad aportan en paralelo</h4>
+              <div class="flow-parallel">
+                <div><strong>Arquitecto</strong><span>Define pasos del servidor, contrato API y errores que consumirá el cliente.</span></div>
+                <div><strong>QA + Security Review</strong><span>Identifican escenarios de validación, privacidad y límites que deben comprobarse.</span></div>
               </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-number">2</span>
-              <div>
-                <h3>DESIGN · Resolver cómo construirlo</h3>
-                <p><strong>Arquitecto</strong> define design.md, ADR y contrato API. En paralelo, <strong>QA y Seguridad</strong> identifican escenarios límite y riesgos y los reportan a Producto/Arquitectura.</p>
-                <p class="workflow-branch"><strong>Revisión:</strong> Arquitectura valida el diseño; Producto ajusta la spec si cambia el comportamiento. Los huecos regresan a PROPOSE o DESIGN.</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <article class="flow-card">
+              <span class="flow-label">Construir en paralelo</span>
+              <h4>Backend y frontend implementan el recorrido</h4>
+              <div class="flow-parallel">
+                <div><strong>Backend</strong><span>Valida datos, controla pasos, activa la wallet y registra eventos.</span></div>
+                <div><strong>Frontend</strong><span>Muestra progreso, guía la corrección y conserva los datos ingresados ante errores.</span></div>
               </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-number">3</span>
-              <div>
-                <h3>APPLY · Implementar tarea por tarea</h3>
-                <p><strong>Backend y frontend</strong> implementan contra la spec y el contrato API, escriben pruebas y marcan tareas solo cuando las validaciones quedan en verde.</p>
-                <p class="workflow-branch"><strong>Revisión:</strong> Arquitectura contrasta los cambios con el diseño, los ADR y el contrato.</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <article class="flow-card">
+              <span class="flow-label">Decisión · Envío del formulario</span>
+              <h4>¿La información obligatoria es válida?</h4>
+              <div class="flow-branches">
+                <div class="flow-branch retry"><strong>No · Corregir y reintentar</strong>El backend devuelve el error; el frontend indica qué corregir y conserva lo ingresado.</div>
+                <div class="flow-branch success"><strong>Sí · Activar</strong>El backend completa el onboarding, activa la wallet y registra el cierre del flujo.</div>
               </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-number">4</span>
-              <div>
-                <h3>VERIFY · Comprobar criterios y riesgos</h3>
-                <p><strong>QA</strong> ejecuta pruebas y compara el comportamiento con los escenarios. <strong>Seguridad</strong> revisa controles y análisis disponibles para los datos personales, KYC y APIs.</p>
-                <p class="workflow-branch"><strong>Si falla:</strong> vuelve a APPLY con evidencia; las ambigüedades regresan a Producto o Arquitectura.</p>
-              </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-number">5</span>
-              <div>
-                <h3>ARCHIVE · Cerrar y aceptar</h3>
-                <p>Con verificaciones aprobadas, se archiva el change y se actualizan las specs base y la hoja de ruta de la épica.</p>
-                <p class="workflow-branch"><strong>Acepta:</strong> Product Owner revisa la evidencia y acepta la entrega.</p>
-              </div>
-            </li>
-          </ol>
+            </article>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <article class="flow-card">
+              <span class="flow-label">Verificar y aceptar</span>
+              <h4>QA y Seguridad revisan; Producto acepta</h4>
+              <p>QA contrasta los escenarios con la implementación; Seguridad revisa privacidad y controles. <strong>Si hay defectos, vuelven con evidencia a Backend o Frontend para corregir y repetir la verificación.</strong> Con resultados conformes, Producto acepta; tras el lanzamiento se observan mediana de onboarding, activaciones, MAU y CAC.</p>
+            </article>
+          </div>
         </div>
       </div>
-    </section>
-
-    <section class="section" id="historia" aria-labelledby="historia-title">
-      <p class="eyebrow">03 · Historia trabajada</p>
-      <h2 id="historia-title">Registro y activación del MVP de wallet</h2>
-      <p class="muted">Historia <code>#w1-user-onboarding-mvp-completion.sp.md</code> · Épica <code>#peru-wallet-mvp.sp.md</code></p>
-      <blockquote class="story-quote">
-        Como <strong>usuario de smartphone que realiza transferencias diarias de bajo monto</strong>, quiero completar el onboarding con un flujo guiado y señales claras de siguiente paso, para poder empezar a pagar sin abandonar el proceso.
-      </blockquote>
-      <h3 style="margin-top:2rem">Criterios de aceptación</h3>
-      <div class="criteria-grid">
-        <article class="card criterion"><b>1</b><p>La secuencia de pasos requeridos y el paso actual se mantienen visibles durante el onboarding.</p></article>
-        <article class="card criterion"><b>2</b><p>La información obligatoria faltante o inválida bloquea el avance y muestra cómo corregirla.</p></article>
-        <article class="card criterion"><b>3</b><p>Al completar el flujo, la wallet pasa a activa y se habilita el acceso a pagos de bajo monto.</p></article>
-        <article class="card criterion"><b>4</b><p>Se registran eventos de inicio, finalización de cada paso y cierre del flujo para analítica.</p></article>
-        <article class="card criterion"><b>5</b><p>La mediana de finalización para la cohorte MVP baja de 8 a 3 minutos dentro del trimestre posterior al lanzamiento.</p></article>
-        <article class="card criterion"><b>6</b><p>La analítica entrega conteos mensuales de nuevos usuarios activos y atribución de gasto para verificar MAU y CAC en meses 1–3.</p></article>
-      </div>
-      <div class="grid-2" style="margin-top:1rem">
-        <article class="card">
-          <h3>Dependencia de producto y cumplimiento</h3>
-          <p>La secuencia de requisitos KYC y documentación debe definirse con Cumplimiento y Producto antes de implementar.</p>
-        </article>
-        <article class="card">
-          <h3>Pregunta abierta registrada</h3>
-          <p>¿Qué frontera de eventos define oficialmente la duración del onboarding: qué timestamps marcan el inicio y el fin?</p>
-        </article>
-      </div>
-      <div class="callout"><strong>Regla de trabajo:</strong> si una decisión abierta cambia el comportamiento o la medición, se aclara antes de codificar; no se inventa una respuesta en backend o frontend.</div>
     </section>
 
   </main>
