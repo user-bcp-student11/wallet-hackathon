@@ -1,6 +1,7 @@
 {
   "version": 1,
   "skills": {
+<<<<<<< Updated upstream
     "hexagonal-architecture": {
       "source": "affaan-m/ecc",
       "sourceType": "github",
@@ -18,6 +19,13 @@
       "sourceType": "github",
       "skillPath": "skills/solid/SKILL.md",
       "computedHash": "9f4c0fe1cfbc7b5c480ad492e6b8cc5af52d5531edbabe4dfb359d92f6732f45"
+=======
+    "git-commit": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/git-commit/SKILL.md",
+      "computedHash": "8f5a47c99951ec09853abf3231c76f48caac5d6b84ea912dd4997e6996885c0b"
+>>>>>>> Stashed changes
     }
   }
 }
