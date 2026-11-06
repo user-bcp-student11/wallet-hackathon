@@ -26,8 +26,6 @@ usuario y la trazabilidad entre la épica, las historias y las specs de OpenSpec
    - Cada criterio de aceptación se trace a al menos un `### Requirement` con escenarios `WHEN/THEN`.
    - Se separen los criterios verificables en código de las metas de negocio medidas después del lanzamiento.
 2. **Resolver decisiones provisionales.** En `design.md` hay decisiones marcadas como "Decisión provisional". Para cada una, confirma o corrige con el usuario y actualiza la spec si cambia el comportamiento. Pendientes del change `add-wallet-onboarding`:
-   - D4: frontera oficial de duración del onboarding.
-   - D6: definición de MAU.
    - D2: secuencia de pasos de KYC (requiere a Cumplimiento).
 3. **Aceptar entregas.** Revisa que los escenarios pasen (informe de `qa-test`) y que el comportamiento observable coincida con la spec. Si algo no coincide, abre un ajuste en el change, no en el código.
 4. **Mantener la hoja de ruta.** Actualiza la sección "Hoja de ruta de la épica" de `openspec/config.yaml` cuando un change se cree o archive.

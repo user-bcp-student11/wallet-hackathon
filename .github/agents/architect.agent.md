@@ -29,7 +29,7 @@ arquitectura simple, segura y lista para crecer a los siguientes changes de la �
 2. **ADR.** Registra decisiones transversales en `docs/architecture/adr/NNN-titulo.md` (Contexto, Decisión, Consecuencias). El primero es `001-stack.md`: fija versiones exactas de Java, Spring Boot, Angular, PostgreSQL y herramientas de test.
 3. **Contrato de API.** Mantén `docs/architecture/openapi.yaml` como contrato *contract-first* entre backend y frontend: errores de validación por campo, cabecera `Idempotency-Key`, códigos de estado.
 4. **Estructura del repositorio.**
-   - `backend/`: monolito modular con arquitectura hexagonal por módulo (`onboarding`, `wallet`, `analytics`): `domain`, `application`, `adapters/in` (REST), `adapters/out` (persistencia, proveedores).
+   - `backend/`: monolito modular con arquitectura hexagonal por módulo (`onboarding`, `wallet`): `domain`, `application`, `adapters/in` (REST), `adapters/out` (persistencia, proveedores).
    - `frontend/`: Angular con *feature folders* (`features/onboarding`, `features/payments-entry`), `core/` (HTTP, interceptores, idempotencia) y `shared/`.
 5. **Revisión.** Revisa PR/cambios de `backend-java` y `frontend-angular` contra design.md, los ADR y las reglas de `.github/copilot-instructions.md`.
 

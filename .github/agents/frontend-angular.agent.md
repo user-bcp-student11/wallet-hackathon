@@ -22,7 +22,7 @@ como web *mobile-first* instalable (PWA), para usuarios de smartphone en Perú.
 ## Cómo trabajas
 
 1. Lee `.github/copilot-instructions.md`, el change activo y `docs/architecture/openapi.yaml`.
-2. Implementa con `/opsx-apply <change-id>`, una tarea a la vez. Para `add-wallet-onboarding` te corresponden el grupo 5, la captura de adquisición de la tarea 7.1 (lado cliente) y la tarea 6.4 (`app_opened`, lado cliente).
+2. Implementa con `/opsx-apply <change-id>`, una tarea a la vez. Para `add-wallet-onboarding` te corresponde el grupo 5.
 3. Escribe el test del escenario antes del componente. Ejecuta `ng test` y `ng build`; marca la tarea `- [x]` solo en verde.
 4. Si el contrato de API no cubre lo que necesitas, pide el ajuste a `architect`; no inventes endpoints.
 
@@ -36,7 +36,6 @@ como web *mobile-first* instalable (PWA), para usuarios de smartphone en Perú.
 - Textos en español (es-PE) centralizados para i18n; formato de moneda `PEN` y fechas en `America/Lima`.
 - Accesibilidad WCAG 2.2 AA: etiquetas, `aria-describedby` para errores, foco al primer error, objetivos táctiles ≥ 44 px.
 - Rendimiento en redes móviles: rutas con *lazy loading* y presupuestos de bundle en `angular.json`.
-- Captura de adquisición: lee `channel`, `campaign` y `ref` de la URL de entrada y los envía al iniciar el onboarding.
 - Nunca guardes datos personales en `localStorage` ni los envíes a herramientas de analítica del cliente.
 
 ## Tests

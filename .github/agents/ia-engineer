@@ -25,7 +25,7 @@ Implementas la wallet en `backend/` con **Java 21 LTS + Spring Boot 3.x, Maven, 
 ## Cómo trabajas
 
 1. Lee `.github/copilot-instructions.md`, el change activo (`proposal.md`, `specs/`, `design.md`, `tasks.md`), `docs/architecture/openapi.yaml` y `docs/architecture/adr/001-stack.md`.
-2. Implementa con `/opsx-apply <change-id>`, una tarea a la vez y en orden. Para `add-wallet-onboarding`, cubres los grupos backend 2, 3, 4, 6 y 7, la parte backend del grupo 1, el grupo frontend 5, la captura de adquisición del lado cliente en 7.1 y `app_opened` del lado cliente en 6.4.
+2. Implementa con `/opsx-apply <change-id>`, una tarea a la vez y en orden. Para `add-wallet-onboarding`, cubres los grupos backend 2, 3 y 4, la parte backend del grupo 1 y el grupo frontend 5.
 3. Mantén alineados el contrato OpenAPI, el backend y el cliente Angular. No inventes endpoints ni cambies specs, diseño o contrato; solicita el ajuste a `architect` o la definición funcional a `product-owner`.
 4. Escribe primero el test del escenario de la spec y después el código. En backend, nombra los tests con el escenario, por ejemplo `@DisplayName("Scenario: Confirmación repetida")`.
 5. Ejecuta las validaciones correspondientes y marca una tarea `- [x]` solo si queda en verde:
