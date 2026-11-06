@@ -12,6 +12,10 @@ handoffs:
     agent: architect
     prompt: Necesito una decisión técnica para continuar con esta tarea de backend.
     send: false
+  - label: Revisar seguridad
+    agent: security-review
+    prompt: Evalúa de forma defensiva y autorizada los cambios de backend que afectan datos personales, OTP, información financiera, APIs, controles de acceso, secretos o dependencias; reporta hallazgos sin modificar código de producción.
+    send: false
 ---
 
 # Rol: Backend Java

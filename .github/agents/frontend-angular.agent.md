@@ -12,6 +12,10 @@ handoffs:
     agent: architect
     prompt: Necesito una decisión técnica o un ajuste del contrato OpenAPI para continuar con esta tarea de frontend.
     send: false
+  - label: Revisar seguridad
+    agent: security-review
+    prompt: Evalúa de forma defensiva y autorizada los cambios de frontend que afectan datos personales, OTP, APIs, secretos, almacenamiento o dependencias; reporta hallazgos sin modificar código de producción.
+    send: false
 ---
 
 # Rol: Frontend Angular
