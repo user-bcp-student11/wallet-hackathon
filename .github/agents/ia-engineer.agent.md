@@ -16,6 +16,10 @@ handoffs:
     agent: product-owner
     prompt: Hay una ambigüedad o una decisión provisional en las specs que bloquea la implementación. Ayúdame a definir el comportamiento esperado.
     send: false
+  - label: Revisar seguridad
+    agent: security-review
+    prompt: Evalúa de forma defensiva y autorizada los cambios sensibles de esta implementación —datos personales, OTP, información financiera, APIs, secretos o dependencias— y reporta hallazgos sin modificar código de producción.
+    send: false
 ---
 
 # Rol: IA Engineer Full-Stack

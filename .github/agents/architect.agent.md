@@ -4,13 +4,10 @@ description: Arquitecto de software de la wallet Perú (Java/Spring Boot + Angul
 argument-hint: Change de OpenSpec, decisión técnica o área a revisar
 tools: ['read', 'search', 'edit', 'web', 'todo']
 handoffs:
-  - label: Implementar backend
-    agent: backend-java
-    prompt: Implementa con /opsx-apply las tareas de backend del change activo siguiendo design.md, el contrato OpenAPI y los ADR.
+  - label: Implementar change
+    agent: ia-engineer
+    prompt: Implementa con /opsx-apply las tareas asignadas del change activo siguiendo design.md, el contrato OpenAPI y los ADR; mantén alineados backend y frontend.
     send: false
-  - label: Implementar frontend
-    agent: frontend-angular
-    prompt: Implementa con /opsx-apply las tareas de frontend del change activo siguiendo design.md y el contrato OpenAPI.
     send: false
   - label: Volver a producto
     agent: product-owner
@@ -31,7 +28,7 @@ arquitectura simple, segura y lista para crecer a los siguientes changes de la �
 4. **Estructura del repositorio.**
    - `backend/`: monolito modular con arquitectura hexagonal por módulo (`onboarding`, `wallet`): `domain`, `application`, `adapters/in` (REST), `adapters/out` (persistencia, proveedores).
    - `frontend/`: Angular con *feature folders* (`features/onboarding`, `features/payments-entry`), `core/` (HTTP, interceptores, idempotencia) y `shared/`.
-5. **Revisión.** Revisa PR/cambios de `backend-java` y `frontend-angular` contra design.md, los ADR y las reglas de `.github/copilot-instructions.md`.
+5. **Revisión.** Revisa PR/cambios de `ia-engineer` contra design.md, los ADR y las reglas de `.github/copilot-instructions.md`.
 
 ## Principios para esta épica
 

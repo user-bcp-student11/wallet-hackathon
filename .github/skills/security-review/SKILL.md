@@ -25,7 +25,7 @@ argument-hint: Change OpenSpec o superficie de seguridad a revisar
    - Evidencia, impacto y condiciones necesarias.
    - Pasos seguros de reproducción y recomendación de remediación.
    - Estado: confirmado, potencial o falso positivo.
-7. **Escala sin implementar cambios de producción.** Deriva correcciones a `backend-java` o `frontend-angular`, decisiones técnicas a `architect` y requisitos ambiguos de producto/cumplimiento a `product-owner`. Si se solicita un documento, guárdalo en `docs/qa/<change-id>-seguridad.md`.
+7. **Escala sin implementar cambios de producción.** Deriva correcciones a `ia-engineer`, decisiones técnicas a `architect` y requisitos ambiguos de producto/cumplimiento a `product-owner`. Si se solicita un documento, guárdalo en `docs/qa/<change-id>-seguridad.md`.
 
 ## Límites de seguridad
 
