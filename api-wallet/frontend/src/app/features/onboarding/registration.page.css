@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.625rem;
+}
+
+h1:focus {
+  outline: none;
+}
+
+.intro {
+  margin: 0 0 1.5rem;
+  color: var(--color-muted);
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+input[readonly] {
+  background: var(--color-surface-muted);
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.alert {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 2px solid var(--color-danger);
+  border-radius: 0.5rem;
+  background: var(--color-danger-bg);
+}
+
+.alert p {
+  margin: 0 0 0.75rem;
+}
+
+.alert:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+form .btn {
+  width: 100%;
+}

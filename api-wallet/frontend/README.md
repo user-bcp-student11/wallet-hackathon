@@ -1,59 +1,39 @@
-# Frontend
+# Frontend · Wallet (W1 registro y activación)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+App Angular mobile-first del change OpenSpec `add-wallet-onboarding`. Consume el contrato
+`../backend/src/main/resources/openapi-wallet.yml` (tag "W1 · Registro y activación"). Las versiones
+están fijadas en `../docs/architecture/adr/001-stack.md`.
 
-## Development server
+## Flujo
 
-To start a local development server, run:
+`/registro`: formulario con `documentType` `TEST` (fijo), `document` (prefijo `TEST-`) y el escenario a
+simular (`APPROVED`, `REJECTED`, `MANUAL_REVIEW` o `UNAVAILABLE`).
 
-```bash
-ng serve
-```
+1. `POST /kyc/verifications` crea la verificación y su wallet.
+2. `GET /wallets/{wallet_id}` trae el estado y los saldos (céntimos de PEN).
+3. El resultado depende del estado:
+   - `ACTIVE`: wallet activa.
+   - `PENDING`: en revisión. «Actualizar estado» vuelve a consultar `GET /kyc/verifications/{id}`.
+   - `REJECTED`: rechazada, con opción de intentar de nuevo.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Los errores `{"error": "CODE"}` se muestran en español (`src/app/core/i18n/messages.es-pe.ts`).
+`KYC_UNAVAILABLE` permite reintentar. El resultado vive solo en memoria.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Desarrollo
 
 ```bash
-ng build
+npm install
+npm start          # http://localhost:4200, con proxy de /kyc y /wallets a http://127.0.0.1:8787
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+El backend debe estar levantado en el puerto 8787 (`../backend`, `./mvnw spring-boot:run`, con PostgreSQL).
+El proxy está en `proxy.conf.json`; el backend no necesita CORS.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Pruebas
 
 ```bash
-ng test
+npm test                         # unitarias y de componente (Vitest + jsdom)
+npm run build                    # build de producción con presupuestos de bundle
+npx playwright install chromium  # una sola vez
+npm run e2e                      # E2E Playwright en viewport Pixel 7 (backend simulado con page.route)
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

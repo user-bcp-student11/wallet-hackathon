@@ -3,9 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   reporter: 'list',
+  projects: [{ name: 'mobile-chromium', use: { ...devices['Pixel 7'] } }],
   use: {
     baseURL: 'http://localhost:4200',
-    ...devices['Pixel 7'],
   },
   webServer: {
     command: 'npm start',

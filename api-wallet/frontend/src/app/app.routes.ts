@@ -1,16 +1,11 @@
 import { Routes } from '@angular/router';
-import { paymentsAccessGuard } from './core/guards/payments-access.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'onboarding' },
+  { path: '', pathMatch: 'full', redirectTo: 'registro' },
   {
-    path: 'onboarding',
-    loadComponent: () => import('./features/onboarding/onboarding.page').then((m) => m.OnboardingPage),
+    path: 'registro',
+    title: 'Crea tu wallet',
+    loadComponent: () => import('./features/onboarding/registration.page').then((m) => m.RegistrationPage),
   },
-  {
-    path: 'pagos',
-    canActivate: [paymentsAccessGuard],
-    loadComponent: () => import('./features/payments/payments.page').then((m) => m.PaymentsPage),
-  },
-  { path: '**', redirectTo: 'onboarding' },
+  { path: '**', redirectTo: 'registro' },
 ];

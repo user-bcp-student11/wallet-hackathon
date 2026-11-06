@@ -1,87 +1,95 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
-import { FieldError, Onboarding, ProblemDetails, StepValues } from '../../core/api/api.models';
-import { OnboardingApi } from '../../core/api/onboarding.api';
-import { MESSAGES } from '../../shared/i18n/messages.es-pe';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, switchMap } from 'rxjs';
+import { ApiError, toApiError } from '../../core/api/api-error';
+import { KycApi } from '../../core/api/kyc.api';
+import { CreateKycRequest, Kyc, Wallet } from '../../core/api/kyc.models';
+import { WalletApi } from '../../core/api/wallet.api';
 
-@Injectable()
+type Phase = 'idle' | 'submitting' | 'refreshing';
+
+/**
+ * Estado del registro, solo en memoria (no se guarda en el navegador: al recargar se pierde).
+ */
+@Injectable({ providedIn: 'root' })
 export class OnboardingStore {
-  private readonly api = inject(OnboardingApi);
+  private readonly kycApi = inject(KycApi);
+  private readonly walletApi = inject(WalletApi);
 
-  readonly onboarding = signal<Onboarding | null>(null);
-  readonly loading = signal(false);
-  readonly submitting = signal(false);
-  readonly fieldErrors = signal<FieldError[]>([]);
-  readonly message = signal<string | null>(null);
-  readonly codeSent = signal(false);
+  private readonly phase = signal<Phase>('idle');
+  readonly kyc = signal<Kyc | null>(null);
+  readonly wallet = signal<Wallet | null>(null);
+  /** Error al crear la verificación (formulario). */
+  readonly error = signal<ApiError | null>(null);
+  /** Error al consultar el resultado (verificación o wallet) después de crearla. */
+  readonly resultError = signal<ApiError | null>(null);
 
-  start(): void {
-    this.loading.set(true);
-    this.message.set(null);
-    this.api.start().subscribe({
-      next: (onboarding) => {
-        this.onboarding.set(onboarding);
-        this.loading.set(false);
+  readonly submitting = computed(() => this.phase() === 'submitting');
+  readonly refreshing = computed(() => this.phase() === 'refreshing');
+
+  /** Crea la verificación y, si se creó, consulta su wallet. */
+  register(request: CreateKycRequest): void {
+    if (this.phase() !== 'idle') return;
+    this.phase.set('submitting');
+    this.error.set(null);
+    this.kycApi.create(request).subscribe({
+      next: (kyc) => {
+        this.kyc.set(kyc);
+        this.loadWallet(kyc);
       },
-      error: (error: HttpErrorResponse) => {
-        this.message.set(this.problemMessage(error));
-        this.loading.set(false);
-      },
-    });
-  }
-
-  submit(values: StepValues): void {
-    const current = this.onboarding();
-    if (!current?.currentStep) {
-      return;
-    }
-    this.submitting.set(true);
-    this.message.set(null);
-    this.api.submitStep(current.id, current.currentStep, values).subscribe({
-      next: (onboarding) => {
-        this.fieldErrors.set([]);
-        this.codeSent.set(false);
-        this.onboarding.set(onboarding);
-        this.submitting.set(false);
-      },
-      error: (error: HttpErrorResponse) => this.handleSubmitError(error),
-    });
-  }
-
-  requestOtp(phoneNumber: string): void {
-    const current = this.onboarding();
-    if (!current) {
-      return;
-    }
-    this.message.set(null);
-    this.api.requestOtp(current.id, phoneNumber).subscribe({
-      next: () => this.codeSent.set(true),
-      error: (error: HttpErrorResponse) => {
-        const problem = error.error as ProblemDetails | null;
-        if (error.status === 422 && problem?.errors) {
-          this.fieldErrors.set(problem.errors);
-          return;
-        }
-        this.message.set(this.problemMessage(error));
+      error: (err: unknown) => {
+        this.error.set(toApiError(err));
+        this.phase.set('idle');
       },
     });
   }
 
-  private handleSubmitError(error: HttpErrorResponse): void {
-    const problem = error.error as ProblemDetails | null;
-    this.submitting.set(false);
-    if (error.status === 422 && problem?.errors) {
-      this.fieldErrors.set(problem.errors);
-      return;
-    }
-    if (error.status === 409) {
-      this.start();
-    }
-    this.message.set(this.problemMessage(error));
+  /** Vuelve a consultar la verificación y su wallet (útil mientras está `PENDING`). */
+  refresh(): void {
+    const current = this.kyc();
+    if (!current || this.phase() !== 'idle') return;
+    this.phase.set('refreshing');
+    this.resultError.set(null);
+    this.kycApi
+      .get(current.id)
+      .pipe(
+        switchMap((kyc): Observable<Wallet> => {
+          this.kyc.set(kyc);
+          return this.walletApi.get(kyc.wallet_id);
+        }),
+      )
+      .subscribe({
+        next: (wallet) => {
+          this.wallet.set(wallet);
+          this.phase.set('idle');
+        },
+        error: (err: unknown) => {
+          this.resultError.set(toApiError(err));
+          this.phase.set('idle');
+        },
+      });
   }
 
-  private problemMessage(error: HttpErrorResponse): string {
-    const problem = error.error as ProblemDetails | null;
-    return problem?.detail ?? MESSAGES.app.genericError;
+  /** Descarta el resultado para iniciar un nuevo registro. */
+  reset(): void {
+    this.kyc.set(null);
+    this.wallet.set(null);
+    this.error.set(null);
+    this.resultError.set(null);
+    this.phase.set('idle');
+  }
+
+  private loadWallet(kyc: Kyc): void {
+    this.wallet.set(null);
+    this.resultError.set(null);
+    this.walletApi.get(kyc.wallet_id).subscribe({
+      next: (wallet) => {
+        this.wallet.set(wallet);
+        this.phase.set('idle');
+      },
+      error: (err: unknown) => {
+        this.resultError.set(toApiError(err));
+        this.phase.set('idle');
+      },
+    });
   }
 }

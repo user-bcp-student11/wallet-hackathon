@@ -1,0 +1,55 @@
+<section [class]="'result result--' + kyc().status.toLowerCase()" aria-labelledby="result-title">
+  <h2 id="result-title" #heading tabindex="-1">{{ title() }}</h2>
+  <p class="result__body" data-testid="result-body">{{ body() }}</p>
+
+  <dl class="result__details">
+    <div>
+      <dt>{{ t.verificationId }}</dt>
+      <dd data-testid="kyc-id">{{ kyc().id }}</dd>
+    </div>
+    <div>
+      <dt>{{ t.walletId }}</dt>
+      <dd>{{ kyc().wallet_id }}</dd>
+    </div>
+    @if (wallet(); as w) {
+      <div>
+        <dt>{{ t.walletStatus }}</dt>
+        <dd data-testid="wallet-status">{{ statusLabels[w.status] }}</dd>
+      </div>
+      <div>
+        <dt>{{ t.balance }}</dt>
+        <dd data-testid="wallet-balance">{{ w.balance | penCents }}</dd>
+      </div>
+      <div>
+        <dt>{{ t.available }}</dt>
+        <dd data-testid="wallet-available">{{ w.available | penCents }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (errorText(); as message) {
+    <p class="result__error" role="alert">{{ message }}</p>
+  }
+
+  <div class="actions">
+    @switch (kyc().status) {
+      @case ('PENDING') {
+        <button type="button" class="btn btn--primary" [disabled]="refreshing()" (click)="refresh.emit()">
+          {{ refreshing() ? t.refreshing : t.refresh }}
+        </button>
+        <button type="button" class="btn btn--secondary" (click)="restart.emit()">{{ t.newRegistration }}</button>
+      }
+      @case ('REJECTED') {
+        <button type="button" class="btn btn--primary" (click)="restart.emit()">{{ t.tryAgain }}</button>
+      }
+      @default {
+        @if (error()) {
+          <button type="button" class="btn btn--primary" [disabled]="refreshing()" (click)="refresh.emit()">
+            {{ refreshing() ? t.refreshing : t.refresh }}
+          </button>
+        }
+        <button type="button" class="btn btn--secondary" (click)="restart.emit()">{{ t.newRegistration }}</button>
+      }
+    }
+  </div>
+</section>

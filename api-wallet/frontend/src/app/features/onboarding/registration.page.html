@@ -1,0 +1,67 @@
+<h1 #title tabindex="-1">{{ t.title }}</h1>
+
+@if (store.kyc(); as kyc) {
+  <app-registration-result
+    [kyc]="kyc"
+    [wallet]="store.wallet()"
+    [error]="store.resultError()"
+    [refreshing]="store.refreshing()"
+    (refresh)="store.refresh()"
+    (restart)="restart()"
+  />
+} @else {
+  <p class="intro">{{ t.intro }}</p>
+
+  @if (serverError(); as error) {
+    <div class="alert" role="alert" tabindex="-1" #errorAlert data-testid="server-error">
+      <p>{{ error.message }}</p>
+      @if (error.retryable) {
+        <button type="button" class="btn btn--secondary" [disabled]="store.submitting()" (click)="submit()">
+          {{ t.retry }}
+        </button>
+      }
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="field">
+      <label for="documentType">{{ t.documentTypeLabel }}</label>
+      <input id="documentType" type="text" [value]="documentType" readonly aria-describedby="documentType-hint" />
+      <p class="hint" id="documentType-hint">{{ t.documentTypeHint }}</p>
+    </div>
+
+    @let docError = documentError();
+    <div class="field">
+      <label for="document">{{ t.documentLabel }}</label>
+      <input
+        id="document"
+        type="text"
+        formControlName="document"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        required
+        [attr.aria-invalid]="docError ? 'true' : null"
+        [attr.aria-describedby]="describedBy('document-hint', docError, 'document-error')"
+      />
+      <p class="hint" id="document-hint">{{ t.documentHint }}</p>
+      @if (docError) {
+        <app-field-error errorId="document-error" [message]="docError" />
+      }
+    </div>
+
+    <div class="field">
+      <label for="scenario">{{ t.scenarioLabel }}</label>
+      <select id="scenario" formControlName="scenario" aria-describedby="scenario-hint">
+        @for (scenario of scenarios; track scenario) {
+          <option [value]="scenario">{{ scenarioLabels[scenario] }}</option>
+        }
+      </select>
+      <p class="hint" id="scenario-hint">{{ t.scenarioHint }}</p>
+    </div>
+
+    <button type="submit" class="btn btn--primary" [disabled]="store.submitting()" [attr.aria-busy]="store.submitting()">
+      {{ store.submitting() ? t.submitting : t.submit }}
+    </button>
+  </form>
+}

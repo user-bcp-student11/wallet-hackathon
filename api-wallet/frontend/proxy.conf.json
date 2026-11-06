@@ -1,6 +1,12 @@
 {
-  "/api": {
-    "target": "http://localhost:8080",
-    "secure": false
+  "/kyc": {
+    "target": "http://127.0.0.1:8787",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/wallets": {
+    "target": "http://127.0.0.1:8787",
+    "secure": false,
+    "changeOrigin": true
   }
 }

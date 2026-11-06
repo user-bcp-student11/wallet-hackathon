@@ -1,6 +1,128 @@
+/* Estilos globales mobile-first. Colores con contraste WCAG AA sobre fondo blanco. */
+:root {
+  --color-text: #1a1a1a;
+  --color-muted: #4a5160;
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eceef2;
+  --color-border: #8a919e;
+  --color-primary: #0a4fbf;
+  --color-primary-hover: #083d94;
+  --color-focus: #ff9e1b;
+  --color-success: #1b7a3a;
+  --color-warning: #8a5a00;
+  --color-danger: #b3261e;
+  --color-danger-bg: #fdecea;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 100%;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color: #111827;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-surface);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.app-header {
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.app-main {
+  max-width: 32rem;
+  margin: 1rem auto;
+  padding: 1.25rem 1rem;
+  background: var(--color-surface);
+  border-radius: 0.75rem;
+}
+
+.app-main:focus {
+  outline: none;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+@media (min-width: 40rem) {
+  .app-main {
+    margin-top: 2rem;
+    padding: 2rem;
+  }
 }
