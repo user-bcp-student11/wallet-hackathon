@@ -1,0 +1,295 @@
+<div class="wrap">
+  <a class="back" routerLink="/">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 12H5M11 6l-6 6 6 6" />
+    </svg>
+    Volver al inicio
+  </a>
+
+  <section class="card">
+    @if (result(); as verification) {
+      <div class="result" [attr.data-status]="verification.status">
+        <div class="result-head">
+          <span class="status-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              @switch (verification.status) {
+                @case ('ACTIVE') {
+                  <path d="M5 13l4 4L19 7" />
+                }
+                @case ('PENDING') {
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                }
+                @default {
+                  <path d="M6 6l12 12M18 6L6 18" />
+                }
+              }
+            </svg>
+          </span>
+          <h1 #resultHeading id="result-title" class="title" tabindex="-1">
+            {{ statusView()?.title }}
+          </h1>
+        </div>
+        <p class="subtitle">{{ statusView()?.detail }}</p>
+        @if (existing()) {
+          <p class="notice" data-testid="existing-note">
+            Esta persona ya tenía una wallet de prueba: mostramos la existente y no se creó otra.
+          </p>
+        }
+        <p class="notice" data-testid="simulation-note">
+          Verificación simulada: el servicio de demostración solo comprueba que el documento
+          coincida con una persona ficticia de prueba. No es una verificación de identidad real.
+        </p>
+
+        <dl class="details">
+          <div>
+            <dt>Estado de la wallet</dt>
+            <dd>
+              <span class="badge" [attr.data-status]="verification.status">{{
+                statusView()?.label
+              }}</span>
+              <span class="code">{{ verification.status }}</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Saldo disponible</dt>
+            <dd data-testid="balance">
+              {{ availableBalance() ?? 'No disponible por ahora' }}
+            </dd>
+          </div>
+          <div>
+            <dt>ID de verificación</dt>
+            <dd data-testid="verification-id">{{ verification.id }}</dd>
+          </div>
+          <div>
+            <dt>ID de wallet</dt>
+            <dd data-testid="wallet-id">{{ verification.wallet_id }}</dd>
+          </div>
+        </dl>
+
+        <button type="button" class="button button-secondary" (click)="startOver()">
+          Nueva verificación
+        </button>
+      </div>
+    } @else if (person(); as found) {
+      <div class="found">
+        <div class="result-head">
+          <span class="status-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="8" r="4" />
+              <path d="M2 21v-1a6 6 0 0 1 6-6h2M16 19l2 2 4-4" />
+            </svg>
+          </span>
+          <h1 #foundHeading id="found-title" class="title" tabindex="-1">
+            Encontramos tu registro
+          </h1>
+        </div>
+        <p class="subtitle">Puedes continuar con la activación de tu wallet de prueba.</p>
+
+        <dl class="details single">
+          <div>
+            <dt>Documento</dt>
+            <dd data-testid="found-document">{{ foundDocumentLabel() }}</dd>
+          </div>
+        </dl>
+
+        <div role="alert">
+          @if (error(); as failure) {
+            <p class="alert" [attr.data-kind]="failure.kind">{{ failure.message }}</p>
+          }
+        </div>
+
+        <div class="actions">
+          <button
+            #activateButton
+            type="button"
+            class="button"
+            data-testid="activate"
+            [disabled]="busy() || otpChallenge() !== undefined"
+            [attr.aria-busy]="busy()"
+            (click)="activate()"
+          >
+            @if (requestingOtp()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Enviando código…
+            } @else if (activating()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Activando…
+            } @else {
+              Activar wallet
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            }
+          </button>
+          <button
+            type="button"
+            class="button button-secondary"
+            [disabled]="busy() || otpChallenge() !== undefined"
+            (click)="changeDocument()"
+          >
+            Usar otro documento
+          </button>
+        </div>
+        <p class="sr-only" role="status">
+          {{
+            requestingOtp()
+              ? 'Generando tu código de verificación…'
+              : activating()
+                ? 'Activando tu wallet de prueba…'
+                : ''
+          }}
+        </p>
+
+        @if (otpChallenge(); as challenge) {
+          <app-otp-dialog
+            [userId]="found.userId"
+            [challenge]="challenge"
+            [busy]="activating()"
+            (verified)="onOtpVerified($event)"
+            (dismissed)="closeOtp()"
+          />
+        }
+
+        <ng-container *ngTemplateOutlet="simNote" />
+      </div>
+    } @else {
+      <h1 id="activation-title" class="title">Activa tu wallet</h1>
+      <p class="subtitle">Primero, cuéntanos quién eres. Ingresa tu documento para comenzar.</p>
+
+      <form
+        (submit)="onSubmit($event)"
+        novalidate
+        aria-labelledby="activation-title"
+        [attr.aria-busy]="looking()"
+      >
+        <div class="field">
+          <label for="document-type">Tipo de documento</label>
+          <select
+            #documentTypeSelect
+            id="document-type"
+            aria-required="true"
+            [formField]="activationForm.documentType"
+            [attr.aria-invalid]="documentTypeError() ? 'true' : null"
+            [attr.aria-describedby]="documentTypeError() ? 'document-type-error' : null"
+          >
+            <option value="">Selecciona una opción</option>
+            @for (type of documentTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+          @if (documentTypeError(); as message) {
+            <p id="document-type-error" class="error">{{ message }}</p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="document-number">Número de documento</label>
+          <input
+            #documentNumberInput
+            id="document-number"
+            type="text"
+            placeholder="Ingresa tu número"
+            autocomplete="off"
+            spellcheck="false"
+            aria-required="true"
+            [formField]="activationForm.documentNumber"
+            [attr.aria-invalid]="documentNumberError() ? 'true' : null"
+            [attr.aria-describedby]="
+              documentNumberError()
+                ? 'document-number-hint document-number-error'
+                : 'document-number-hint'
+            "
+          />
+          <p id="document-number-hint" class="hint">Revisa que coincida con tu documento.</p>
+          @if (documentNumberError(); as message) {
+            <p id="document-number-error" class="error">{{ message }}</p>
+          }
+        </div>
+
+        <div role="alert">
+          @if (error(); as failure) {
+            <p class="alert" [attr.data-kind]="failure.kind">{{ failure.message }}</p>
+          }
+        </div>
+
+        <button type="submit" class="button" [disabled]="looking()">
+          @if (looking()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Consultando…
+          } @else {
+            Continuar
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          }
+        </button>
+        <p class="sr-only" role="status">
+          {{ looking() ? 'Consultando tu documento de prueba…' : '' }}
+        </p>
+      </form>
+
+      <ng-container *ngTemplateOutlet="simNote" />
+    }
+  </section>
+</div>
+
+<!-- Indicación discreta, compartida por los pasos con formulario y confirmación. -->
+<ng-template #simNote>
+  <p class="sim-note">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </svg>
+    <span
+      >Verificación simulada. Usa únicamente datos ficticios: no ingreses tu DNI ni tu carné de
+      extranjería reales.</span
+    >
+  </p>
+</ng-template>

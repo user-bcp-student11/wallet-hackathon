@@ -1,0 +1,202 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Pantalla compacta y centrada. El espaciado depende de la altura de la ventana para que el
+   formulario y el resultado quepan sin scroll en escritorio; en móvil o con zoom/texto grande la
+   página crece y hace scroll en lugar de ocultar contenido. */
+.wrap {
+  width: min(100%, 28rem);
+}
+
+.back {
+  min-height: 2.5rem;
+  margin-bottom: 0;
+}
+
+.card {
+  padding: clamp(1.125rem, 3vh, 1.75rem) clamp(1.25rem, 5vw, 1.75rem);
+  border-radius: 1.25rem;
+}
+
+.title {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.field {
+  gap: 0.375rem;
+  margin-top: clamp(0.625rem, 1.8vh, 1rem);
+}
+
+input[type='text'],
+select {
+  min-height: 3rem;
+}
+
+.button {
+  min-height: 3rem;
+  margin-top: clamp(0.875rem, 2.4vh, 1.375rem);
+}
+
+.sim-note {
+  margin-top: clamp(0.625rem, 1.6vh, 1rem);
+}
+
+/* Resultado: el color y el icono distinguen wallet activa, pendiente y rechazada. */
+.result {
+  --accent: var(--color-warning);
+  --accent-bg: var(--color-warning-bg);
+}
+
+.result[data-status='ACTIVE'] {
+  --accent: var(--color-success);
+  --accent-bg: var(--color-success-bg);
+}
+
+.result[data-status='REJECTED'] {
+  --accent: var(--color-error);
+  --accent-bg: var(--color-error-bg);
+}
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+
+.result-head .title {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.status-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+}
+
+.status-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.notice {
+  margin: 0.75rem 0 0;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  background: var(--color-field);
+  border-left: 4px solid var(--color-accent-2);
+  border-radius: 0.5rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem 1rem;
+  margin: clamp(0.625rem, 1.8vh, 1rem) 0 0;
+}
+
+.details div {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.details dt {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.details dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.0625rem 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+}
+
+.code {
+  margin-left: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+/* Persona encontrada: confirmación antes de activar. */
+.found {
+  --accent: var(--color-accent);
+  --accent-bg: rgb(126 168 255 / 12%);
+}
+
+.details.single {
+  grid-template-columns: 1fr;
+}
+
+.found .alert {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.actions {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: clamp(0.875rem, 2.4vh, 1.375rem);
+}
+
+.actions .button {
+  margin-top: 0;
+}
+
+/* Alertas más compactas para que el estado de error siga cabiendo sin scroll. */
+.alert {
+  margin-top: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Ventanas bajas: un poco más de compactación. */
+@media (max-height: 700px) {
+  .card {
+    padding-block: 1rem;
+  }
+
+  .subtitle {
+    line-height: 1.45;
+  }
+
+  .field {
+    margin-top: 0.5rem;
+  }
+
+  .notice {
+    margin-top: 0.5rem;
+  }
+}
