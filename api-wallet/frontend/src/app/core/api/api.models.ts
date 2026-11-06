@@ -1,42 +1,29 @@
-export type OnboardingStatus = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED';
-export type StepStatus = 'COMPLETED' | 'CURRENT' | 'PENDING';
-export type WalletState = 'NO_WALLET' | 'ONBOARDING_IN_PROGRESS' | 'ACTIVE';
+export type KycScenario = 'APPROVED' | 'REJECTED' | 'MANUAL_REVIEW' | 'UNAVAILABLE';
+export type KycStatus = 'ACTIVE' | 'PENDING' | 'REJECTED';
 
-export interface StepView {
-  code: string;
-  title: string;
-  status: StepStatus;
+export interface KycRequest {
+  documentType: 'TEST';
+  document: string;
+  scenario: KycScenario;
 }
 
-export interface Onboarding {
+export interface KycVerification {
   id: string;
-  status: OnboardingStatus;
-  stepNumber: number;
-  totalSteps: number;
-  currentStep?: string;
-  instruction?: string;
-  nextStepLabel?: string;
-  steps: StepView[];
-  walletActive: boolean;
+  wallet_id: string;
+  scenario: Exclude<KycScenario, 'UNAVAILABLE'>;
+  status: KycStatus;
 }
 
-export interface FieldError {
-  field: string;
-  message: string;
+export interface Wallet {
+  id: string;
+  status: KycStatus;
+  /** Importes en céntimos de PEN. */
+  balance: number;
+  reserved: number;
+  available: number;
+  currency: 'PEN';
 }
 
-export interface ProblemDetails {
-  type?: string;
-  title?: string;
-  status?: number;
-  detail?: string;
-  errors?: FieldError[];
-  currentStep?: string;
-  walletState?: WalletState;
-}
-
-export type StepValues = Record<string, string>;
-
-export interface PaymentsAccess {
-  enabled: boolean;
+export interface ApiError {
+  error: string;
 }

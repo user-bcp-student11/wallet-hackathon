@@ -26,21 +26,21 @@
 
 - [x] 4.1 Implementar `GET /wallets/{id}` con `available = balance - reserved` y `currency` `PEN`, y verificar con pruebas de "Wallet precargada", "Saldo disponible" y "Wallet inexistente"
 
-## 5. Frontend (pendiente)
+## 5. Frontend
 
-El frontend existente sigue el flujo anterior (pasos, OTP, `Idempotency-Key`, `X-User-Id`) y no funciona contra este backend. Estas tareas lo realinean al contrato.
+El frontend sigue el contrato `openapi-wallet.yml`: registro por `POST /kyc/verifications`, consulta de la verificación y de la wallet, sin pasos, OTP, `Idempotency-Key` ni `X-User-Id`.
 
-- [ ] 5.1 Realinear el cliente HTTP al contrato `openapi-wallet.yml` (`/kyc/verifications`, `/kyc/verifications/{id}`, `/wallets/{id}`), retirando el flujo por pasos, `Idempotency-Key` y `X-User-Id` y apuntando el proxy al puerto 8787, y verificar con pruebas unitarias del cliente
-- [ ] 5.2 Implementar el formulario de registro (`documentType` `TEST`, `document`, `scenario`) con validación local y mapeo de los errores `{"error": "CODE"}` a mensajes en español, y verificar con pruebas de "Entrada inválida" y "Proveedor no disponible"
-- [ ] 5.3 Mostrar el resultado del registro según el estado: `ACTIVE`, `PENDING` (explicar que falta una decisión) y `REJECTED`, consultando la verificación y la wallet, y verificar con pruebas de "Escenario aprobado", "Revisión manual" y "Escenario rechazado"
-- [ ] 5.4 Conservar la accesibilidad (etiquetas, `aria-describedby`, foco al primer error, objetivos táctiles de al menos 44 px) y los textos es-PE centralizados, y verificar con pruebas de componente de foco y de mensajes
-- [ ] 5.5 Realinear el E2E con Playwright en viewport móvil al registro y a un error recuperable, y verificar que pasa en verde
+- [x] 5.1 Realinear el cliente HTTP al contrato `openapi-wallet.yml` (`/kyc/verifications`, `/kyc/verifications/{id}`, `/wallets/{id}`), retirando el flujo por pasos, `Idempotency-Key` y `X-User-Id` y apuntando el proxy al puerto 8787, y verificar con pruebas unitarias del cliente
+- [x] 5.2 Implementar el formulario de registro (`documentType` `TEST`, `document`, `scenario`) con validación local y mapeo de los errores `{"error": "CODE"}` a mensajes en español, y verificar con pruebas de "Entrada inválida" y "Proveedor no disponible"
+- [x] 5.3 Mostrar el resultado del registro según el estado: `ACTIVE`, `PENDING` (explicar que falta una decisión) y `REJECTED`, consultando la verificación y la wallet, y verificar con pruebas de "Escenario aprobado", "Revisión manual" y "Escenario rechazado"
+- [x] 5.4 Conservar la accesibilidad (etiquetas, `aria-describedby`, foco al primer error, objetivos táctiles de al menos 44 px) y los textos es-PE centralizados, y verificar con pruebas de componente de foco y de mensajes
+- [x] 5.5 Realinear el E2E con Playwright en viewport móvil al registro y a un error recuperable, y verificar que pasa en verde
 
 ## 6. Verificación integral
 
 - [x] 6.1 Elaborar `api-wallet/docs/qa/add-wallet-onboarding-trazabilidad.md` con una fila por comportamiento del contrato y su test, y verificar que todos están en estado cubierto y en verde
 - [x] 6.2 Ejecutar `./mvnw clean verify` y verificar que termina sin errores
-- [ ] 6.3 Ejecutar `ng test`, `ng build`, `npx playwright test` y `openspec validate add-wallet-onboarding --strict` tras realinear el frontend, y verificar que terminan sin errores
+- [x] 6.3 Ejecutar `ng test`, `ng build`, `npx playwright test` y `openspec validate add-wallet-onboarding --strict` tras realinear el frontend, y verificar que terminan sin errores
 
 ## Workflow follow-up
 

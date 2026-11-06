@@ -19,6 +19,7 @@ h1 {
 
 .retry {
   min-height: 44px;
+  min-width: 44px;
   padding: 0 1.25rem;
   border: 1px solid #1d4ed8;
   border-radius: 0.5rem;

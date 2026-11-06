@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+dl {
+  margin: 0 0 1rem;
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0 0 0.5rem;
+}
+
+button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  min-width: 44px;
+  margin-bottom: 0.75rem;
+  padding: 0 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button.primary {
+  border: 0;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+}
+
+button.secondary {
+  border: 1px solid #1d4ed8;
+  background: #fff;
+  color: #1d4ed8;
+}

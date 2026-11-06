@@ -13,7 +13,7 @@ label {
   font-weight: 600;
 }
 
-input:not([type='checkbox']),
+input,
 select {
   min-height: 44px;
   padding: 0 0.75rem;
@@ -27,27 +27,10 @@ select[aria-invalid='true'] {
   border-color: #b00020;
 }
 
-.checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 44px;
-}
-
-.checkbox input {
-  width: 24px;
-  height: 24px;
-}
-
 .hint {
   margin: 0;
   color: #4b5563;
   font-size: 0.875rem;
-}
-
-.status {
-  margin: 0 0 1rem;
-  color: #166534;
 }
 
 button {
@@ -65,12 +48,6 @@ button.primary {
   background: #1d4ed8;
   color: #fff;
   font-weight: 600;
-}
-
-button.secondary {
-  border: 1px solid #1d4ed8;
-  background: #fff;
-  color: #1d4ed8;
 }
 
 button:disabled {
