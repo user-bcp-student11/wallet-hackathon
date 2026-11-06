@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "hexagonal-architecture": {
+      "source": "affaan-m/ecc",
+      "sourceType": "github",
+      "skillPath": "skills/hexagonal-architecture/SKILL.md",
+      "computedHash": "9bcc7b90143ab607eb6dbac67df028c9d8c7303e787395da5b2ef311f52e55eb"
+    },
+    "java-junit": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/java-junit/SKILL.md",
+      "computedHash": "092bc94008ad8aac39a625aa53d05852063c21d295c30a2515c348ce2e64fe49"
+    },
+    "solid": {
+      "source": "ramziddin/solid-skills",
+      "sourceType": "github",
+      "skillPath": "skills/solid/SKILL.md",
+      "computedHash": "9f4c0fe1cfbc7b5c480ad492e6b8cc5af52d5531edbabe4dfb359d92f6732f45"
+    }
+  }
+}
